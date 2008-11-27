@@ -1,10 +1,10 @@
 <?php
-class cleanLabels extends mapWareCore {
+class CleanLabels extends MapWareCore {
 	var $nivel;
 	var $tables = array();
 	var $notCleanLabels = array();
 	//contadores
-	function cleanLabels($nivelNumber = 1){
+	function CleanLabels($nivelNumber = 1){
 		/*$puntos1 = array(array(0, 0), array(1, -1), array(4, 2), array(3, 3));
 		$puntos2 = array(array(1, 3), array(4, -1), array(5, 0), array(2, 4));
 		$label1 = new LabelBox(array(0, 0), array(1, -1), array(4, 2), array(3, 3));

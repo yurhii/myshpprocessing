@@ -7,10 +7,10 @@
 
 <body>
 <?
-$urlRoot = "../";
-include($urlRoot."src/includer.inc.php");
+ini_set("include_path", ini_get("include_path") . ":../src");
+require_once("MapWareCore.php");
 $nivel = isset($_REQUEST["nivel"]) ? $_REQUEST["nivel"] : 1;
-$core = new mapWareCore();
+$core = new MapWareCore();
 
 $table_name = "calles";
 

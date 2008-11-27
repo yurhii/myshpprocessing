@@ -1,10 +1,13 @@
 <?php
-class processShapeFile extends mapWareCore{
+include("ShapeFile.inc.php"); 
+include("InsertShapeFile.inc.php");
+
+class ProcessShapeFile extends MapWareCore{
 	var $insertShp;
 	//explode array
 	var $shp = array();
 	var $table = array();
-	function processShapeFile(){
+	function ProcessShapeFile(){
 		$this->openMySQLConn();
 		//tomar un shape file sin procesar
 		$query = "SELECT * FROM `shape_files` 

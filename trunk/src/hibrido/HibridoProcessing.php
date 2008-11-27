@@ -1,94 +1,133 @@
-<?PHP
-class drawImage extends mapWareCore{
+<?PHP	
+class HibridoProcessing extends MapWareCore{
+	
 	var $imagenes_por_request = 100;
 	var $cpu;
-	//color del mar
-	var $colorMar = "91B3CC00";
-	//current image canvas (objeto de imagen de php)
-	var $imageCanvas;
-	//current image data
-	var $image;
-	//cuadro asociado a la current image
-	var $square;
-	//el nivel a dibujar
-	var $nivel;
-	//
+	
+	var $bufferSize;
+	var $nivelInicial;
+	var $nivelFinal;
+	
 	var $layer;
-	function drawImage($nivelNumber = 1, $cpuNumber = 1){
+	var $image;
+	var $imageCanvas;
+	var $square;
+	
+	var $nivel;
+	
+	function HibridoProcessing($nivel = 1, $cpuNumber = 1){
 		$this->openMySQLConn();
-		//set nivel a limpiar
-		$this->nivel = $nivelNumber;
-		//set cpu
-		$this->cpu = $cpuNumber;
-		//definir variables y limites globales
 		$this->defineMapWareBounds();
-		//
-		$this->actualizarEscalaPorNivel($this->nivel); 
+		$this->nivel = $nivel;
+		$this->cpu = $cpuNumber;
 	}
-	function startDrawing(){
-		//extrarer imagenes
-		$query = "SELECT `imagenes`.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
-		FROM `imagenes`
-JOIN areas_urbanas_por_imagen ON areas_urbanas_por_imagen.i = imagenes.i
-AND areas_urbanas_por_imagen.j = imagenes.j
-AND areas_urbanas_por_imagen.nivel = imagenes.nivel
-WHERE  areas_urbanas_por_imagen.clave =  'AU_BSIGEO_533'
-		AND `imagenes`.`nivel` = '$this->nivel' 
-		AND `aDibujar` = '1' 
+	function startProcessingAllNoMatchToOurSateliteAssets(){
+		$this->actualizarEscalaPorNivel($this->nivel);
+		
+		$query = "select imagenes.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
+		from imagenes
+		where imagenes.nivel = '$this->nivel'
+		and mapa_exists = '1' and hibrido_exists = '0'
 		AND `cpu` = '".$this->cpu."'
-		LIMIT ".$this->imagenes_por_request;
-		//AND MBRIntersects(mysql_puntos, (select mysql_puntos from areas_urbanas where clave = 'AU_BSIGEO_533')) = 1
-		$imagenes = mysql_query($query) or die($query);
-		if(mysql_num_rows($imagenes) == 0){
-			return false;
-		}
-		$this->startDrawPorImagen($imagenes);
-		return true;
+		limit $this->imagenes_por_request";
+		$res = mysql_query($query) or die($query);
+		$this->processImagesForHibrid($res);
+		//
+		return (mysql_num_rows($res) != 0);
 	}
-	function startDrawPorImagen($imagenes){
-		while($this->image = mysql_fetch_array($imagenes)){
+	
+	function startProcessingToMatchOurSateliteAssets(){
+		//sacar una imagen de satelite a convertir a hibrido que no haya sido convertida antes
+		$query = "select * from satelite_originales 
+		where hibrido = 0 and generada = 1 
+		limit 1";
+		$satelites = mysql_query($query) or die($query);
+		$resource = mysql_fetch_array($satelites) or die("no hay satelites para hacer hibrido");
+		//el buffer de cuatro imagenes es para que al ver el final de una imagen de sat de hd no se corten las calles
+		$this->bufferSize = ($resource == 1) ? 4 : 1;
+		//definir los niveles en los cuales se va a generar esta imagen de satelite
+		$this->nivelInicial = ($resource == 1) ? 7 : 1;
+		$this->nivelFinal = ($resource == 1) ? 14 : 9;
+		
+		//loop sobre los niveles
+		for($this->nivel = $this->nivelInicial; $this->nivel <= $this->nivelFinal; $this->nivel++){
+			//actualizar datos globales por nivel
+			$this->actualizarEscalaPorNivel($this->nivel);
+			//sacar los limites de la imagen satelital a dibujar 
+			$query = "select count(*) as total, min(imagenes.i) i_min, max(imagenes.i) i_max, 
+			min(imagenes.j) j_min, max(imagenes.j) j_max
+			from imagenes
+			join satelite_originales_por_imagen on satelite_originales_por_imagen.i = imagenes.i
+				and satelite_originales_por_imagen.j = imagenes.j and satelite_originales_por_imagen.nivel = imagenes.nivel
+			where satelite_originales_por_imagen.clave = ".$resource["clave"]." and imagenes.nivel = $this->nivel";
+			$imageBounds = mysql_fetch_array(mysql_query($query)) or die($query);
+			if($imageBounds["total"] != 0){
+				//ahora si con el buffer sacar todas las imagenes en donde se generara el hibrido
+				$query = "select imagenes.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
+				from imagenes
+				where imagenes.nivel = '$this->nivel' 
+				and (`i` between ".($imageBounds["i_min"] - $this->bufferSize)." and ".($imageBounds["i_max"] + $this->bufferSize).") 
+				and (`j` between ".($imageBounds["j_min"] - $this->bufferSize)." and ".($imageBounds["j_max"] + $this->bufferSize).")
+				and mapa_exists = '1'";
+				$res = mysql_query($query) or die($query);
+				$this->processImagesForHibrid($res);
+			}
+		}
+		//actualizar en satelite_imagenes que ya se compelto el hibrido
+		$query = "update satelite_originales set hibrido = '1' 
+		where clave = ".$resource["clave"];
+		mysql_query($query) or die($query);
+	}
+	
+	function processImagesForHibrid($res){
+		while($this->image = mysql_fetch_array($res)){
+			//***************************************extraer elementos y dibujar*****************************************/
 			//saber en que cuadro estamos
 			$this->square = array($this->image["i"], $this->image["j"]);
 			//crear la imagen correspondiente y fijar sus variables
 			//la creamos 20 pixeles mas grande para evitar la raya
-			//el color del fondo es azul de mar
-			$this->imageCanvas = new image($this->resize * $this->squareSize + 20, $this->resize * $this->squareSize + 20, $this->colorMar);
+			//crear imagen con transparencia en el fondo
+			$this->imageCanvas = new image($this->resize * $this->squareSize+20, $this->resize * $this->squareSize+20, '00000000', true);
 			$this->imageCanvas->setVars($this->escala, $this->xmin, $this->ymin);
-			//sacar las capas que se van a dibuar de la tabla de shp_tablas
+			//
 			$query = "SELECT * FROM tables
 			join tables__attributes on tables__attributes.table_name = tables.table_name
-			WHERE drawLayerOrder != 0
-			ORDER BY `drawLayerOrder` asc";
+			WHERE hibridDrawLayerOrder != 0
+			ORDER BY `hibridDrawLayerOrder` asc";
 			$layers = mysql_query($query) or die($query);
 			//dibujar cada capa de informacion geografica
 			while($this->layer = mysql_fetch_array($layers)){
 				$catalgos = explode(",", $this->layer["catalogos"]);
 				$this->layer["pathCampoTipo"] = $catalgos[0]."_id";
-				if($this->nivel >= $this->layer["drawFromNivel"] && $this->nivel <= $this->layer["drawToNivel"]){
-					$this->drawLayer();
-				}
+				$this->drawLayer();
 			}
 			//dibujar labels	
 			$this->drawLabels();
-			//nombre del archivo temporal
-			$archivo = "temporales/img".$this->cpu.".png";
-			//convertir imagen a 200px para
-			$image200px = imagecreatetruecolor($this->squareSize, $this->squareSize);
-			imagecopyresampled($image200px, $this->imageCanvas->image, 0, 0, 0, 0, $this->squareSize, $this->squareSize, $this->squareSize*$this->resize, $this->squareSize*$this->resize);
-			//set compression level = 3
-			imagepng($image200px, $archivo, 3);
+			
+			$image200px = imagecreatetruecolor(200, 200);
+			//transparencia de esta imagen
+			//imagealphablending($image200px, false);
+			imagesavealpha($image200px, true);
+			$transparent = imagecolorallocatealpha($image200px, 0, 0, 0, 127);
+			imagefill($image200px, 0, 0, $transparent);
+			//copiar imagen en esta
+			imagecopyresampled($image200px, $this->imageCanvas->image, 0, 0, 0, 0, 200, 200, 200*$this->resize, 200*$this->resize);
+			//definir la ruta del archivo
+			$archivo = "temporales/hibrid".$this->cpu.".png";
+			//
+			imagepng($image200px, $archivo, 3) or die("no generation of image");
 			chmod($archivo, 0777);
 			//tomar la informacion del archivo e ingresarla a la base de datos
 			$file = mysql_real_escape_string(file_get_contents($archivo));
 			//guardar en base de datos que la imagen ya fue dibujada
 			$query = "UPDATE `imagenes`
-			SET `aDibujar` = '0', `fecha_dibujado` = CURRENT_TIMESTAMP, `mapa` = '$file', `mapa_exists` = '1'
+			SET `hibrido` = '$file', `hibrido_exists` = '1'
 			WHERE `i` = '".$this->image["i"]."' and `j` = '".$this->image["j"]."' 
 			and `nivel` = '".$this->image["nivel"]."'";
 			mysql_query($query) or die($query);
 		}
-		mysql_free_result($imagenes);
 	}
+	
 	function drawLayer(){
 		//dependiendo de la clase de la capa a dibujar
 		switch($this->layer["class"]){
@@ -126,7 +165,7 @@ WHERE  areas_urbanas_por_imagen.clave =  'AU_BSIGEO_533'
 		mysql_free_result($labels);
 	}
 	function drawPath($withBkg){
-		$table_memory_index = $this->cpu % 2;
+		$table_memory_index = rand() % 2;
 		//sacar el codogio de colores y el thick de mapWareCartographicEsthetic con la informacion del campo que guarda el tipo de path
 		// es decir pathCampoTipo en shp_tablas
 		//sacar los tipos de paths asociados a esta tabla
@@ -189,6 +228,8 @@ WHERE  areas_urbanas_por_imagen.clave =  'AU_BSIGEO_533'
 			$color = $path["color"];
 			//set thick
 			$thick = $bkg ? $path["thickBkg"] : $path["thick"];
+			//ajustamos el thick para el hibrido que debe ser mas delgado
+			$thick /= 3;
 			//si es bkg el color es gris	
 			$color = $bkg ? 'A5A5A500' : $color;
 			for($k = 1; $k < count($puntos); $k++){
@@ -222,7 +263,8 @@ WHERE  areas_urbanas_por_imagen.clave =  'AU_BSIGEO_533'
 					array_push($puntosPolygon, $this->resize * $xy[0]/$this->escala);
 					array_push($puntosPolygon, $this->resize * $xy[1]/$this->escala);
 				}
-				$this->imageCanvas->drawFilledPolygon($puntosPolygon, $this->layer["colorBorder"], $this->layer["colorFill"]);
+				//color transparente para el fill
+				$this->imageCanvas->drawFilledPolygon($puntosPolygon, $this->layer["colorBorder"], "FFFFFF7f");
 			}
 		}
 		//de ser especificado dibujar un punto abajo del label de este poligono (caso areas_urbanas, etc)
@@ -250,5 +292,6 @@ WHERE  areas_urbanas_por_imagen.clave =  'AU_BSIGEO_533'
 			mysql_free_result($xy);
 		}
 	}
+
 }
 ?>

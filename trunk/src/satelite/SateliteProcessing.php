@@ -1,5 +1,5 @@
 <?PHP	
-class SateliteProcessing extends mapWareCore{
+class SateliteProcessing extends MapWareCore{
 	var $shp_data;
 	var $dbf_data;
 	var $resources;

@@ -1,6 +1,21 @@
 <?PHP
 define("INFINITO", 10000000000);
-class mapWareCore{
+
+include("conexion/ConexionMySQL.php");
+//shp
+include("shp/ProcessShapeFile.php");
+
+include("labeling/CreateLabels.php"); 
+include("labeling/CleanLabels.php"); 
+//
+include("geometric/LabelBox.php");
+//
+include("drawing/DrawImage.php");
+//
+include("satelite/SateliteProcessing.php");
+include("hibrido/HibridoProcessing.php");
+
+class MapWareCore{
 	var $engine = "MyISAM";
 	var $dataBase = "MapWareProcessing";
 	/************************************************Variables***********************************/
@@ -36,6 +51,11 @@ class mapWareCore{
 	/************Mysql Handling**********/
 	function mapWareCore(){
 		$this->openMySQLConn();
+		$query = "show tables like 'imagenes'";
+		$img_exists = mysql_num_rows(mysql_query($query));
+		if($img_exists == 0){
+			$this->createProcessingTables();
+		}
 	}
 	function openMySQLConn(){
 		//get Mysql connection a la base de datos mapWareCartographicFrameWork
@@ -370,6 +390,273 @@ class mapWareCore{
 	      return false;
 	   else
 	      return true;
+	}
+	/*******************************DataBase SetUp************************/
+	function createProcessingTables(){
+		$query = "CREATE TABLE `global_bounds` (
+		  `xmin` double NOT NULL,
+		  `xmax` double NOT NULL,
+		  `ymin` double NOT NULL,
+		  `ymax` double NOT NULL
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `imagenes` (
+		  `i` int(11) NOT NULL,
+		  `j` int(11) NOT NULL,
+		  `nivel` int(2) NOT NULL,
+		  `mysql_puntos` multipolygon NOT NULL,
+		  `mapa_exists` enum('0','1') NOT NULL,
+		  `satelite_exists` enum('0','1') NOT NULL,
+		  `hibrido_exists` enum('0','1') NOT NULL,
+		  `fecha_dibujado` timestamp NOT NULL default CURRENT_TIMESTAMP,
+		  `mapa` blob NOT NULL,
+		  `satelite` blob NOT NULL,
+		  `hibrido` blob NOT NULL,
+		  `aDibujar` enum('0','1') NOT NULL default '1',
+		  `cpu` enum('0','1','2','3','4','5','6','7') NOT NULL,
+		  PRIMARY KEY  (`i`,`j`,`nivel`),
+		  KEY `mapa_exists` (`mapa_exists`),
+		  KEY `satelite_exists` (`satelite_exists`),
+		  KEY `hibrido_exists` (`hibrido_exists`),
+		  SPATIAL KEY `mysql_puntos` (`mysql_puntos`),
+		  KEY `aDibujar` (`aDibujar`),
+		  KEY `nivel` (`nivel`),
+		  KEY `cpu` (`cpu`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `labels` (
+		  `id` int(11) NOT NULL auto_increment,
+		  `clave` int(11) NOT NULL,
+		  `x` double NOT NULL,
+		  `y` double NOT NULL,
+		  `xmax` int(11) NOT NULL,
+		  `xmin` int(11) NOT NULL,
+		  `ymax` int(11) NOT NULL,
+		  `ymin` int(11) NOT NULL,
+		  `angle` float NOT NULL,
+		  `text` varchar(255) NOT NULL,
+		  `size` int(11) NOT NULL,
+		  `nivel` int(11) NOT NULL,
+		  `table_name` varchar(100) NOT NULL,
+		  `objeto_clave` varchar(50) NOT NULL,
+		  `identifier` varchar(20) NOT NULL COMMENT 'parte_segmento',
+		  `clean` enum('0','1','2') NOT NULL default '1',
+		  `labelValue` int(11) NOT NULL,
+		  `fecha` timestamp NOT NULL default CURRENT_TIMESTAMP,
+		  `mysql_puntos` polygon NOT NULL,
+		  PRIMARY KEY  (`id`),
+		  UNIQUE KEY `xmax_2` (`xmax`,`xmin`,`ymax`,`ymin`,`nivel`,`table_name`,`objeto_clave`),
+		  KEY `nivel` (`nivel`),
+		  KEY `tipo` (`table_name`),
+		  KEY `grupo` (`clave`),
+		  KEY `clean` (`clean`),
+		  KEY `objeto` (`objeto_clave`),
+		  KEY `labelValue` (`labelValue`),
+		  SPATIAL KEY `mysql_puntos` (`mysql_puntos`),
+		  KEY `nivel_4` (`nivel`,`clean`,`labelValue`),
+		  KEY `xmin` (`xmin`),
+		  KEY `ymax` (`ymax`),
+		  KEY `ymin` (`ymin`),
+		  KEY `nivel_2` (`nivel`,`clean`),
+		  KEY `xmax` (`xmax`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8 MAX_ROWS=4294967295 AVG_ROW_LENGTH=50 COMMENT='clean:0=>no sirve, 1=>por checar, 2=>si funciona' AUTO_INCREMENT=1 ;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `labels_por_imagen` (
+		  `clave` varchar(255) NOT NULL,
+		  `i` int(11) NOT NULL,
+		  `j` int(11) NOT NULL,
+		  `nivel` enum('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14') NOT NULL,
+		  PRIMARY KEY  (`clave`,`i`,`j`,`nivel`),
+		  KEY `i` (`i`,`j`,`nivel`),
+		  KEY `clave` (`clave`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+			mysql_query($query);
+			
+			$query = "CREATE TABLE `omiciones` (
+			  `id` int(11) NOT NULL auto_increment,
+			  `palabra` varchar(20) NOT NULL,
+			  PRIMARY KEY  (`id`)
+			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=28 ;";
+			if(mysql_query($query)){
+				$query = "INSERT INTO `omiciones` VALUES (1, 'la');
+				INSERT INTO `omiciones` VALUES (2, 'el');
+				INSERT INTO `omiciones` VALUES (3, 'lo');
+				INSERT INTO `omiciones` VALUES (4, 'los');
+				INSERT INTO `omiciones` VALUES (5, 'las');
+				INSERT INTO `omiciones` VALUES (6, 'en');
+				INSERT INTO `omiciones` VALUES (7, 'a');
+				INSERT INTO `omiciones` VALUES (8, 'ante');
+				INSERT INTO `omiciones` VALUES (9, 'bajo');
+				INSERT INTO `omiciones` VALUES (10, 'cabe');
+				INSERT INTO `omiciones` VALUES (11, 'con');
+				INSERT INTO `omiciones` VALUES (12, 'contra');
+				INSERT INTO `omiciones` VALUES (13, 'desde');
+				INSERT INTO `omiciones` VALUES (14, 'de');
+				INSERT INTO `omiciones` VALUES (15, 'del');
+				INSERT INTO `omiciones` VALUES (16, 'para');
+				INSERT INTO `omiciones` VALUES (17, 'por');
+				INSERT INTO `omiciones` VALUES (18, 'sin');
+				INSERT INTO `omiciones` VALUES (19, 'sobre');
+				INSERT INTO `omiciones` VALUES (20, 'tras');
+				INSERT INTO `omiciones` VALUES (21, 'un');
+				INSERT INTO `omiciones` VALUES (22, 'una');
+				INSERT INTO `omiciones` VALUES (23, 'unos');
+				INSERT INTO `omiciones` VALUES (24, 'unas');
+				INSERT INTO `omiciones` VALUES (26, ',');
+				INSERT INTO `omiciones` VALUES (27, '.');";
+				mysql_query($query);
+			}
+		
+		$query = "CREATE TABLE `paths_tipos` (
+		  `id` int(11) NOT NULL auto_increment,
+		  `table_name` varchar(200) NOT NULL,
+		  `tipo_id` int(11) NOT NULL,
+		  `drawOrder` int(11) NOT NULL,
+		  `descripcion` text NOT NULL,
+		  PRIMARY KEY  (`id`),
+		  UNIQUE KEY `table_name` (`table_name`,`tipo_id`),
+		  KEY `tipo_id` (`tipo_id`),
+		  KEY `table_name_2` (`table_name`),
+		  KEY `drawOrder` (`drawOrder`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `paths_tipos__colores` (
+		  `path_tipo_id` int(11) NOT NULL,
+		  `color` varchar(8) NOT NULL,
+		  `descripcion` varchar(255) NOT NULL,
+		  PRIMARY KEY  (`path_tipo_id`),
+		  UNIQUE KEY `path_tipo_id` (`path_tipo_id`,`color`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+				";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `paths_tipos__length__restrictions` (
+		  `path_tipo_id` int(11) NOT NULL,
+		  `nivel` int(11) NOT NULL,
+		  `longitud_minima` int(11) NOT NULL,
+		  UNIQUE KEY `path_tipo_id` (`path_tipo_id`,`nivel`),
+		  KEY `nivel` (`nivel`),
+		  KEY `path_tipo` (`path_tipo_id`),
+		  KEY `longitud_minima` (`longitud_minima`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `paths_tipos__thicks` (
+		  `nivel` int(11) NOT NULL,
+		  `path_tipo_id` int(11) NOT NULL,
+		  `thick` float NOT NULL,
+		  `thickBkg` float NOT NULL,
+		  KEY `tipo` (`path_tipo_id`),
+		  KEY `nivel` (`nivel`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `satelite_originales_por_imagen` (
+		  `clave` varchar(255) NOT NULL,
+		  `i` int(11) NOT NULL,
+		  `j` int(11) NOT NULL,
+		  `nivel` int(2) NOT NULL,
+		  PRIMARY KEY  (`clave`,`i`,`j`,`nivel`),
+		  KEY `i` (`i`,`j`,`nivel`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `shape_files` (
+		  `id` int(11) NOT NULL auto_increment,
+		  `table_name` varchar(200) NOT NULL,
+		  `url` varchar(255) NOT NULL,
+		  `processed` enum('0','1') NOT NULL,
+		  `campoClave` varchar(20) NOT NULL default 'clave',
+		  PRIMARY KEY  (`id`),
+		  KEY `table_name` (`table_name`)
+		) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;";
+		if(mysql_query($query)){
+			$query = "INSERT INTO `shape_files` VALUES (1, 'estados', 'estados/limite estatal.shp', '1', 'clave');
+				INSERT INTO `shape_files` VALUES (2, 'municipios', 'municipios/limite municipal.shp', '1', 'clave');
+				INSERT INTO `shape_files` VALUES (3, 'parques', 'equipamiento/parque o jardin.shp', '1', 'clave');
+				INSERT INTO `shape_files` VALUES (4, 'areas_urbanas', 'areas_urbanas/area urbana.shp', '1', 'clave');
+				INSERT INTO `shape_files` VALUES (5, 'industrias', 'equipamiento/industria.shp', '1', 'clave');
+				INSERT INTO `shape_files` VALUES (6, 'calles', 'calles/calles df preliminar Folder/calles df preliminar.shp', '1', 'clave');
+				INSERT INTO `shape_files` VALUES (7, 'colonias', 'colonias/colonias.shp', '1', 'clave');";
+			mysql_query($query);
+		}
+		
+		$query = "CREATE TABLE `sonidos_iguales` (
+		  `id` int(11) NOT NULL auto_increment,
+		  `search` varchar(5) NOT NULL,
+		  `replace` varchar(5) NOT NULL,
+		  PRIMARY KEY  (`id`)
+		) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=17 ;";
+		if(mysql_query($query)){
+			$query = "INSERT INTO `sonidos_iguales` VALUES (1, 'cc', 'x');
+			INSERT INTO `sonidos_iguales` VALUES (2, 'ci', 'si');
+			INSERT INTO `sonidos_iguales` VALUES (3, 'z', 's');
+			INSERT INTO `sonidos_iguales` VALUES (4, 'ca', 'ka');
+			INSERT INTO `sonidos_iguales` VALUES (5, 'co', 'ko');
+			INSERT INTO `sonidos_iguales` VALUES (6, 'cu', 'ku');
+			INSERT INTO `sonidos_iguales` VALUES (7, 'que', 'ke');
+			INSERT INTO `sonidos_iguales` VALUES (8, 'qui', 'ki');
+			INSERT INTO `sonidos_iguales` VALUES (9, 'll', 'y');
+			INSERT INTO `sonidos_iguales` VALUES (10, 'v', 'b');
+			INSERT INTO `sonidos_iguales` VALUES (11, 'ge', 'je');
+			INSERT INTO `sonidos_iguales` VALUES (12, 'gi', 'ji');
+			INSERT INTO `sonidos_iguales` VALUES (13, 'ce', 'se');
+			INSERT INTO `sonidos_iguales` VALUES (14, 'cl', 'kl');
+			INSERT INTO `sonidos_iguales` VALUES (15, 'cr', 'kr');
+			INSERT INTO `sonidos_iguales` VALUES (16, 'cy', 'ky');";
+			mysql_query($query);
+		}
+		$query = "CREATE TABLE `satelite_originales` (
+		  `clave` int(11) NOT NULL auto_increment,
+		  `nombre` varchar(255) NOT NULL,
+		  `folder` varchar(255) NOT NULL,
+		  `filename` varchar(255) NOT NULL,
+		  `imagename` varchar(255) NOT NULL,
+		  `hd` enum('0','1') NOT NULL,
+		  `indice` int(11) NOT NULL,
+		  `generada` int(1) NOT NULL,
+		  `hibrido` int(11) NOT NULL,
+		  `fecha` timestamp NOT NULL default CURRENT_TIMESTAMP,
+		  PRIMARY KEY  (`clave`),
+		  KEY `hd` (`hd`),
+		  KEY `generada` (`generada`),
+		  KEY `hibrido` (`hibrido`)
+		) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=84 ;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `tables` (
+		  `table_name` varchar(200) NOT NULL,
+		  `class` enum('RecordPolyLine','RecordPolygon','RecordPoint') NOT NULL,
+		  `drawLayerOrder` int(11) NOT NULL COMMENT '0 is for no draw',
+		  `hibridDrawLayerOrder` int(11) NOT NULL COMMENT '0 is for no drawing',
+		  `labelOrder` int(11) NOT NULL COMMENT '0 is for no labeling',
+		  `fecha` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+		  PRIMARY KEY  (`table_name`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		mysql_query($query);
+		
+		$query = "CREATE TABLE `tables__attributes` (
+		  `table_name` varchar(200) NOT NULL,
+		  `catalogos` text NOT NULL,
+		  `crearImagenesFromNivel` int(11) NOT NULL,
+		  `crearImagenesToNivel` int(11) NOT NULL,
+		  `drawFromNivel` int(11) NOT NULL,
+		  `drawToNivel` int(11) NOT NULL,
+		  `labelFromNivel` int(11) NOT NULL,
+		  `labelToNivel` int(11) NOT NULL,
+		  `colorLabel` varchar(8) NOT NULL,
+		  `colorFill` varchar(8) NOT NULL,
+		  `colorBorder` varchar(8) NOT NULL,
+		  `drawPointInCenter` enum('0','1') NOT NULL,
+		  `drawPointInCenterFromNivel` int(11) NOT NULL,
+		  `drawPointInCenterToNivel` int(11) NOT NULL,
+		  PRIMARY KEY  (`table_name`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='El primer valor del catalogo es el campo de tipo';";
+		mysql_query($query);
 	}
 }
 ?>
