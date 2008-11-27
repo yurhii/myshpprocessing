@@ -587,7 +587,8 @@ class MapWareCore{
 				INSERT INTO `shape_files` VALUES (4, 'areas_urbanas', 'areas_urbanas/area urbana.shp', '0', 'clave');
 				INSERT INTO `shape_files` VALUES (5, 'industrias', 'equipamiento/industria.shp', '0', 'clave');
 				INSERT INTO `shape_files` VALUES (6, 'calles', 'calles/calles.shp', '0', 'clave');
-				INSERT INTO `shape_files` VALUES (7, 'colonias', 'colonias/colonias.shp', '0', 'clave');";
+				INSERT INTO `shape_files` VALUES (7, 'colonias', 'colonias/colonias.shp', '0', 'clave');
+				INSERT INTO `shape_files` VALUES (8, 'puntos_de_interes', 'informacion/puntos de interes nacional.shp', '0', 'clave');";
 			$split = explode(";", $query);
 			for($i=0; $i<count($split); $i++){
 				mysql_query($split[$i]);
@@ -656,7 +657,8 @@ class MapWareCore{
 			INSERT INTO `tables` VALUES ('parques', 'RecordPolygon', 4, 0, 2, '2008-11-27 15:08:01');
 			INSERT INTO `tables` VALUES ('industrias', 'RecordPolygon', 5, 0, 0, '2008-11-27 14:57:35');
 			INSERT INTO `tables` VALUES ('calles', '', 6, 3, 3, '2008-11-27 15:08:01');
-			INSERT INTO `tables` VALUES ('colonias', 'RecordPolygon', 0, 0, 1, '2008-11-27 15:07:36')";
+			INSERT INTO `tables` VALUES ('colonias', 'RecordPolygon', 0, 0, 1, '2008-11-27 15:07:36');
+			INSERT INTO `tables` VALUES ('puntos_de_interes', 'RecordPoint', 0, 0, 0, '2008-11-27 15:30:55');";
 			$split = explode(";", $query);
 			for($i=0; $i<count($split); $i++){
 				mysql_query($split[$i]);
@@ -688,7 +690,8 @@ class MapWareCore{
 			INSERT INTO `tables__attributes` VALUES ('municipios', '', 0, 0, 1, 11, 0, 0, '', 'EDEAD27f', 'DEDEDE00', '0', 0, 0);
 			INSERT INTO `tables__attributes` VALUES ('parques', 'tipo', 0, 0, 7, 13, 8, 13, '0C570200', 'B5E29D00', 'B5E29D7f', '0', 0, 0);
 			INSERT INTO `tables__attributes` VALUES ('colonias', '', 0, 0, 0, 0, 8, 11, '00339900', '', '', '0', 0, 0);
-			INSERT INTO `tables__attributes` VALUES ('calles', 'tipo', 7, 13, 7, 13, 8, 13, '10101000', '', '', '0', 0, 0)";
+			INSERT INTO `tables__attributes` VALUES ('calles', 'tipo', 7, 13, 7, 13, 8, 13, '10101000', '', '', '0', 0, 0);
+			INSERT INTO `tables__attributes` VALUES ('puntos_de_interes', 'tipo,tema', 0, 0, 0, 0, 0, 0, '', '', '', '0', 0, 0);";
 			$split = explode(";", $query);
 			for($i=0; $i<count($split); $i++){
 				mysql_query($split[$i]);
