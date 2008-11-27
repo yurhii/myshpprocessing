@@ -75,11 +75,16 @@ class InsertShapeFile extends MapWareCore{
 					$inserted_clave = $this->insertRecordPoint($shp_data, $dbf_data);
 					break;
 			}
-			//crear y guardar lasimagenes asociadas a este row
-			$upperLeftPoint = array($this->convertXFromShpToMapWare($shp_data["xmin"]),
-								$this->convertYFromShpToMapWare($shp_data["ymax"]));
-			$lowerRightPoint = array($this->convertXFromShpToMapWare($shp_data["xmax"]),
+			if($this->class != "RecordPoint"){
+				//crear y guardar lasimagenes asociadas a este row
+				$upperLeftPoint = array($this->convertXFromShpToMapWare($shp_data["xmin"]),
+									$this->convertYFromShpToMapWare($shp_data["ymax"]));
+				$lowerRightPoint = array($this->convertXFromShpToMapWare($shp_data["xmax"]),
 								$this->convertYFromShpToMapWare($shp_data["ymin"]));
+			}else{
+				$upperLeftPoint = $lowerRightPoint = array($this->convertXFromShpToMapWare($shp_data["x"]),
+									$this->convertYFromShpToMapWare($shp_data["y"]));
+			}
 			for($nivel = $this->nivelInicialDeReferencia; $nivel <= $this->nivelFinalDeReferencia; $nivel++){
 				$upperLeft = $this->getCuadroFromPointAtNivel($upperLeftPoint[0], $upperLeftPoint[1], $nivel);
 				$lowerRight = $this->getCuadroFromPointAtNivel($lowerRightPoint[0], $lowerRightPoint[1], $nivel);
@@ -211,7 +216,6 @@ class InsertShapeFile extends MapWareCore{
 		(".implode(", ", $campos).")
 		values
 		(".implode(", ", $valores).")";
-		die($query);
 		mysql_query($query);
 		return $this->limpiar($dbf_data[strtoupper($this->campoClave)]);
 	}
@@ -461,8 +465,9 @@ class InsertShapeFile extends MapWareCore{
 					array_push($indices, "INDEX(`size`)");
 					break;
 				case "RecordPoint":
-					array_push($campos, "`mysql_punto` point not null");
+					array_push($campos, "`mysql_puntos` point not null");
 					array_push($indices, "SPATIAL INDEX(`mysql_puntos`)");
+					array_push($campos, "`text_puntos` text not null");
 					break;
 			}
 			//añadir campos al query
