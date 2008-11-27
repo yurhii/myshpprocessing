@@ -73,11 +73,15 @@
             if(!is_readable($file_name)){
                 return $this->setError( sprintf(ERROR_FILE_NOT_FOUND, $file_name) );
             }
-            
+            //abrimos la comunicacion con el archivo
             $this->fp = fopen($this->file_name, "rb");
-            $this->_fetchShpBasicConfiguration();
-            $this->_fetchRecords();
+			$this->_fetchShpBasicConfiguration();
+			fseek($this->fp, 100);
         }
+		
+		function fetchAllRecords(){
+            $this->_fetchRecords();
+		}
         
 // Data fetchers
         function _fetchShpBasicConfiguration(){
@@ -91,7 +95,6 @@
         }
         
         function _fetchRecords(){
-            fseek($this->fp, 100);
             while(!feof($this->fp)){
                 $shp_record = new ShapeRecord($this->fp, $this->file_name);
                 if($shp_record->error_message != ""){
@@ -100,6 +103,18 @@
                 $this->records[] = $shp_record;
             }
         }
+		
+		function fetchOneRecord(){
+			 if(!feof($this->fp)){
+                $shp_record = new ShapeRecord($this->fp, $this->file_name);
+                if($shp_record->error_message != ""){
+                    return false;
+                }
+          		return $shp_record;
+			 }else{
+				 return false;
+			 }
+		}
         
         function getDBFHeader(){
         	$dbf_filename = processDBFFileName($this->file_name);
