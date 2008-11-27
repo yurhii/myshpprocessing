@@ -1,10 +1,10 @@
 <?PHP
-$urlRoot = "../";
-include($urlRoot."src/includer.inc.php");
+ini_set("include_path", ini_get("include_path") . ":../src");
+require_once("MapWareCore.php");
 if(isset($_REQUEST["nivel"])){
 	$nivel = $_REQUEST["nivel"];
 	$cpu = isset($_REQUEST["cpu"]) ? $_REQUEST["cpu"] : 1;
-	$draw = new drawImage($nivel, $cpu);
+	$draw = new DrawImage($nivel, $cpu);
 	if($draw->startDrawing()){
 		?>
 		<script type="text/javascript">

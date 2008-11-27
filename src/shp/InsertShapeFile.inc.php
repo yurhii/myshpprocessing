@@ -1,6 +1,6 @@
 <?PHP
 //este srictp requeiere que max_allowed_packet=500M ( esto en MAMP/bin/startMysql.sh )	
-class InsertShapeFile extends mapWareCore{
+class InsertShapeFile extends MapWareCore{
 	var $shp;//ShapeFile
 	//esta variable indica si este para estos elementos cartograficos debe haber o no labels
 	var $withLabels = false;

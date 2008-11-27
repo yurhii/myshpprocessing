@@ -1,8 +1,8 @@
 <?PHP
-$urlRoot = "../";
-include($urlRoot."src/includer.inc.php");
+ini_set("include_path", ini_get("include_path") . ":../src");
+require_once("MapWareCore.php");
 $nivel = isset($_REQUEST["nivel"]) ? $_REQUEST["nivel"] : die("no nivel");
-$clean = new cleanLabels($nivel);
+$clean = new CleanLabels($nivel);
 $clean->startCleaning();
 $clean->closeMySQLConn();
 if($nivel < $clean->nivelMaximoMapa - 1){

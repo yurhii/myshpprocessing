@@ -1,8 +1,8 @@
 <?PHP
-$urlRoot = "../";
-include($urlRoot."src/includer.inc.php");
+ini_set("include_path", ini_get("include_path") . ":../src");
+require_once("MapWareCore.php");
 if(isset($_REQUEST["process"]) || isset($_REQUEST["preview"])){
-	$process = new processShapeFile();
+	$process = new ProcessShapeFile();
 	if(isset($_REQUEST["process"])){
 		$process->startProcessing();
 		?>

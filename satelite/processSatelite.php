@@ -1,6 +1,6 @@
 <?php
-$urlRoot = "../";
-include($urlRoot."src/includer.inc.php");
+ini_set("include_path", ini_get("include_path") . ":../src");
+require_once("MapWareCore.php");
 if(isset($_REQUEST["preview"])){
 	$satelite = new SateliteProcessing();
 	$satelite->preview();

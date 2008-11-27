@@ -1,5 +1,5 @@
 <?PHP
-class createLabels extends mapWareCore {
+class CreateLabels extends MapWareCore {
 	var $table_name;
 	var $class;
 	//esta variable indica que las referencias con imagenes se crean de la tabla labels i.e. en labels_por_imagen en vez
@@ -16,7 +16,7 @@ class createLabels extends mapWareCore {
 	var $pathCampoTipo;
 	//variable que nos dice cual es el current index a insertar en la base de datos
 	var $nextAutoIndex;
-	function createLabels($tableName, $nivelNumber = NULL){
+	function CreateLabels($tableName, $nivelNumber = NULL){
 		$this->openMySQLConn();
 		$this->nivel = $nivelNumber;
 		if(!is_numeric($this->nivel)){

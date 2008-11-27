@@ -1,6 +1,6 @@
 <?php
-$urlRoot = "../";
-include($urlRoot."src/includer.inc.php");
+ini_set("include_path", ini_get("include_path") . ":../src");
+require_once("MapWareCore.php");
 if(isset($_REQUEST["start"])){
 	$nivel = isset($_REQUEST["nivel"]) ? $_REQUEST["nivel"] : 1;
 	$cpu = isset($_REQUEST["cpu"]) ? $_REQUEST["cpu"] : 1;
