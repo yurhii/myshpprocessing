@@ -1,19 +1,19 @@
 <?PHP
 define("INFINITO", 10000000000);
 
-include("conexion/ConexionMySQL.php");
+include_once("conexion/ConexionMySQL.php");
 //shp
-include("shp/ProcessShapeFile.php");
+include_once("shp/ProcessShapeFile.php");
 
-include("labeling/CreateLabels.php"); 
-include("labeling/CleanLabels.php"); 
+include_once("labeling/CreateLabels.php"); 
+include_once("labeling/CleanLabels.php"); 
 //
-include("geometric/LabelBox.php");
+include_once("geometric/LabelBox.php");
 //
-include("drawing/DrawImage.php");
+include_once("drawing/DrawImage.php");
 //
-include("satelite/SateliteProcessing.php");
-include("hibrido/HibridoProcessing.php");
+include_once("satelite/SateliteProcessing.php");
+include_once("hibrido/HibridoProcessing.php");
 
 class MapWareCore{
 	var $engine = "MyISAM";
@@ -399,7 +399,10 @@ class MapWareCore{
 		  `ymin` double NOT NULL,
 		  `ymax` double NOT NULL
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
-		mysql_query($query);
+		if(mysql_query($query)){
+			$query = "INSERT INTO `global_bounds` VALUES (-11712512.68, -8670935.82, -3271886.96, -1453391.17);";
+			mysql_query($query);
+		}
 		
 		$query = "CREATE TABLE `imagenes` (
 		  `i` int(11) NOT NULL,
@@ -507,7 +510,10 @@ class MapWareCore{
 				INSERT INTO `omiciones` VALUES (24, 'unas');
 				INSERT INTO `omiciones` VALUES (26, ',');
 				INSERT INTO `omiciones` VALUES (27, '.');";
-				mysql_query($query);
+				$split = explode(";", $query);
+				for($i=0; $i<count($split); $i++){
+					mysql_query($split[$i]);
+				}
 			}
 		
 		$query = "CREATE TABLE `paths_tipos` (
@@ -575,14 +581,17 @@ class MapWareCore{
 		  KEY `table_name` (`table_name`)
 		) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;";
 		if(mysql_query($query)){
-			$query = "INSERT INTO `shape_files` VALUES (1, 'estados', 'estados/limite estatal.shp', '1', 'clave');
-				INSERT INTO `shape_files` VALUES (2, 'municipios', 'municipios/limite municipal.shp', '1', 'clave');
-				INSERT INTO `shape_files` VALUES (3, 'parques', 'equipamiento/parque o jardin.shp', '1', 'clave');
-				INSERT INTO `shape_files` VALUES (4, 'areas_urbanas', 'areas_urbanas/area urbana.shp', '1', 'clave');
-				INSERT INTO `shape_files` VALUES (5, 'industrias', 'equipamiento/industria.shp', '1', 'clave');
-				INSERT INTO `shape_files` VALUES (6, 'calles', 'calles/calles df preliminar Folder/calles df preliminar.shp', '1', 'clave');
-				INSERT INTO `shape_files` VALUES (7, 'colonias', 'colonias/colonias.shp', '1', 'clave');";
-			mysql_query($query);
+			$query = "INSERT INTO `shape_files` VALUES (1, 'estados', 'estados/limite estatal.shp', '0', 'clave');
+				INSERT INTO `shape_files` VALUES (2, 'municipios', 'municipios/limite municipal.shp', '0', 'clave');
+				INSERT INTO `shape_files` VALUES (3, 'parques', 'equipamiento/parque o jardin.shp', '0', 'clave');
+				INSERT INTO `shape_files` VALUES (4, 'areas_urbanas', 'areas_urbanas/area urbana.shp', '0', 'clave');
+				INSERT INTO `shape_files` VALUES (5, 'industrias', 'equipamiento/industria.shp', '0', 'clave');
+				INSERT INTO `shape_files` VALUES (6, 'calles', 'calles/calles.shp', '0', 'clave');
+				INSERT INTO `shape_files` VALUES (7, 'colonias', 'colonias/colonias.shp', '0', 'clave');";
+			$split = explode(";", $query);
+			for($i=0; $i<count($split); $i++){
+				mysql_query($split[$i]);
+			}
 		}
 		
 		$query = "CREATE TABLE `sonidos_iguales` (
@@ -608,7 +617,10 @@ class MapWareCore{
 			INSERT INTO `sonidos_iguales` VALUES (14, 'cl', 'kl');
 			INSERT INTO `sonidos_iguales` VALUES (15, 'cr', 'kr');
 			INSERT INTO `sonidos_iguales` VALUES (16, 'cy', 'ky');";
-			mysql_query($query);
+			$split = explode(";", $query);
+			for($i=0; $i<count($split); $i++){
+				mysql_query($split[$i]);
+			}
 		}
 		$query = "CREATE TABLE `satelite_originales` (
 		  `clave` int(11) NOT NULL auto_increment,
@@ -637,7 +649,20 @@ class MapWareCore{
 		  `fecha` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
 		  PRIMARY KEY  (`table_name`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
-		mysql_query($query);
+		if(mysql_query($query)){
+			$query = "INSERT INTO `tables` VALUES ('areas_urbanas', 'RecordPolygon', 3, 0, 4, '2008-11-27 15:08:01');
+			INSERT INTO `tables` VALUES ('estados', 'RecordPolygon', 1, 1, 5, '2008-11-27 15:08:01');
+			INSERT INTO `tables` VALUES ('municipios', 'RecordPolygon', 2, 2, 6, '2008-11-27 15:08:01');
+			INSERT INTO `tables` VALUES ('parques', 'RecordPolygon', 4, 0, 2, '2008-11-27 15:08:01');
+			INSERT INTO `tables` VALUES ('industrias', 'RecordPolygon', 5, 0, 0, '2008-11-27 14:57:35');
+			INSERT INTO `tables` VALUES ('calles', '', 6, 3, 3, '2008-11-27 15:08:01');
+			INSERT INTO `tables` VALUES ('colonias', 'RecordPolygon', 0, 0, 1, '2008-11-27 15:07:36')";
+			$split = explode(";", $query);
+			for($i=0; $i<count($split); $i++){
+				mysql_query($split[$i]);
+			}
+		}
+		
 		
 		$query = "CREATE TABLE `tables__attributes` (
 		  `table_name` varchar(200) NOT NULL,
@@ -656,7 +681,19 @@ class MapWareCore{
 		  `drawPointInCenterToNivel` int(11) NOT NULL,
 		  PRIMARY KEY  (`table_name`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='El primer valor del catalogo es el campo de tipo';";
-		mysql_query($query);
+		if(mysql_query($query)){
+			$query = "INSERT INTO `tables__attributes` VALUES ('estados', '', 1, 9, 1, 13, 1, 9, '98969700', 'F2EFEA00', 'B3AFAF00', '0', 0, 0);
+			INSERT INTO `tables__attributes` VALUES ('areas_urbanas', 'tipo', 1, 13, 1, 13, 1, 9, '33333300', 'EDEAD200', 'DEDEDE00', '1', 1, 8);
+			INSERT INTO `tables__attributes` VALUES ('industrias', 'tipo', 0, 0, 7, 13, 12, 13, 'FD606F00', 'FFB4B400', 'FFB4B47f', '0', 0, 0);
+			INSERT INTO `tables__attributes` VALUES ('municipios', '', 0, 0, 1, 11, 0, 0, '', 'EDEAD27f', 'DEDEDE00', '0', 0, 0);
+			INSERT INTO `tables__attributes` VALUES ('parques', 'tipo', 0, 0, 7, 13, 8, 13, '0C570200', 'B5E29D00', 'B5E29D7f', '0', 0, 0);
+			INSERT INTO `tables__attributes` VALUES ('colonias', '', 0, 0, 0, 0, 8, 11, '00339900', '', '', '0', 0, 0);
+			INSERT INTO `tables__attributes` VALUES ('calles', 'tipo', 7, 13, 7, 13, 8, 13, '10101000', '', '', '0', 0, 0)";
+			$split = explode(";", $query);
+			for($i=0; $i<count($split); $i++){
+				mysql_query($split[$i]);
+			}
+		}
 	}
 }
 ?>

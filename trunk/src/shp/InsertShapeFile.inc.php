@@ -39,9 +39,9 @@ class InsertShapeFile extends MapWareCore{
 		$this->defineMapWareBounds();
 		//define shapeFile from url
 		$this->shp = new ShapeFile("../".$source_url) or die("no shape file"); // along this file the class will use file.shx and file.dbf
-		$this->class = $this->shp->records[0]->record_class[$this->shp->records[0]->record_shape_type];
 	}
 	function preview($todos = false){
+		$this->shp->fetchAllRecords();
 		// Let's see all the records:
 		$top = ($todos) ? count($this->shp->records) : 1;
 		for($i=0; $i< $top;$i++){
@@ -53,10 +53,17 @@ class InsertShapeFile extends MapWareCore{
 	}
 	//clases posibles polygon, path, point
 	function insertShpData(){
-		$this->crearTablas();
-		for($indice = 0; $indice< count($this->shp->records);$indice++){
-			$shp_data = $this->shp->records[$indice]->shp_data;
-			$dbf_data = $this->shp->records[$indice]->dbf_data;
+		$first_record = false;
+		//for($indice = 0; $indice< count($this->shp->records);$indice++){
+		while($shp_record = $this->shp->fetchOneRecord()){
+			$shp_data = $shp_record->shp_data;
+			$dbf_data = $shp_record->dbf_data;
+			$this->class = $shp_record->record_class[$shp_record->record_shape_type];
+			//
+			if(!$first_record){
+				$this->crearTablas($shp_record);
+				$first_record = true;
+			}
 			switch($this->class){
 				case "RecordPolyLine":
 					$inserted_clave = $this->insertRecordPolyLine($shp_data, $dbf_data);
@@ -77,7 +84,7 @@ class InsertShapeFile extends MapWareCore{
 				$upperLeft = $this->getCuadroFromPointAtNivel($upperLeftPoint[0], $upperLeftPoint[1], $nivel);
 				$lowerRight = $this->getCuadroFromPointAtNivel($lowerRightPoint[0], $lowerRightPoint[1], $nivel);
 				if($nivel > 9 && $this->table_name == "areas_urbanas"){
-					$padding = 10;
+					$padding = 8;
 				}elseif($this->table_name == "areas_urbanas"){
 					$padding = 3;
 				}elseif($this->table_name == "calles"){
@@ -204,6 +211,7 @@ class InsertShapeFile extends MapWareCore{
 		(".implode(", ", $campos).")
 		values
 		(".implode(", ", $valores).")";
+		die($query);
 		mysql_query($query);
 		return $this->limpiar($dbf_data[strtoupper($this->campoClave)]);
 	}
@@ -367,9 +375,9 @@ class InsertShapeFile extends MapWareCore{
 		//regresamos el valor del cmapo clave de este row
 		return $this->limpiar($dbf_data[strtoupper($this->campoClave)]);
 	}
-	function crearTablas(){
-		$shp_data = $this->shp->records[0]->shp_data;
-		$dbf_data = $this->shp->records[0]->dbf_data;
+	function crearTablas($shp_record){
+		$shp_data = $shp_record->shp_data;
+		$dbf_data = $shp_record->dbf_data;
 		$query = "SHOW TABLES LIKE '".$this->table_name."'";
 		//ver si la tabla ya existe de lo contrario crearla
 		if(mysql_num_rows(mysql_query($query)) == 0){
