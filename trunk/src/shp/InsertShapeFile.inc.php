@@ -7,7 +7,7 @@ class InsertShapeFile extends MapWareCore{
 	//
 	var $table_name = NULL;
 	//variable que define el tipo de shp, poligono, path o punto
-	var $class;
+	var $clase;
 	//array que contiene le nombre de los campos que seran catalogos
 	var $catalogos = array();
 	//variable que nos dice para el caso de paths cual es el campo que define su catalogo principal
@@ -38,7 +38,7 @@ class InsertShapeFile extends MapWareCore{
 		//definir los bordes del area a utulizar en base a las dimensiones del pais
 		$this->defineMapWareBounds();
 		//define shapeFile from url
-		$this->shp = new ShapeFile("../".$source_url) or die("no shape file"); // along this file the class will use file.shx and file.dbf
+		$this->shp = new ShapeFile(SHAPE_FILES.$source_url) or die("no shape file"); // along this file the class will use file.shx and file.dbf
 	}
 	function preview($todos = false){
 		$this->shp->fetchAllRecords();
@@ -58,13 +58,13 @@ class InsertShapeFile extends MapWareCore{
 		while($shp_record = $this->shp->fetchOneRecord()){
 			$shp_data = $shp_record->shp_data;
 			$dbf_data = $shp_record->dbf_data;
-			$this->class = $shp_record->record_class[$shp_record->record_shape_type];
+			$this->clase = $shp_record->record_class[$shp_record->record_shape_type];
 			//
 			if(!$first_record){
 				$this->crearTablas($shp_record);
 				$first_record = true;
 			}
-			switch($this->class){
+			switch($this->clase){
 				case "RecordPolyLine":
 					$inserted_clave = $this->insertRecordPolyLine($shp_data, $dbf_data);
 					break;
@@ -75,7 +75,7 @@ class InsertShapeFile extends MapWareCore{
 					$inserted_clave = $this->insertRecordPoint($shp_data, $dbf_data);
 					break;
 			}
-			if($this->class != "RecordPoint"){
+			if($this->clase != "RecordPoint"){
 				//crear y guardar lasimagenes asociadas a este row
 				$upperLeftPoint = array($this->convertXFromShpToMapWare($shp_data["xmin"]),
 									$this->convertYFromShpToMapWare($shp_data["ymax"]));
@@ -145,7 +145,7 @@ class InsertShapeFile extends MapWareCore{
 							//Si ademas  el catalogo es el catalogo primario (pathCampoTipo) del shp en shp_tablas, 
 							//entonces guardamos la referencia en paths_tipos
 							//y guardamos en paths_tipos__length__restrictions los datos necesarios por cada nivel
-							if(strtolower($key)."_id" == $this->pathCampoTipo){
+							if(strtolower($key) == $this->pathCampoTipo){
 								//si logramos insertar el campo en el catalogo y es un path 
 								$query = "insert into paths_tipos
 								(table_name, tipo_id, descripcion)
@@ -435,7 +435,7 @@ class InsertShapeFile extends MapWareCore{
 				}
 			}
 			//agregar los campos necesarios para la informacion geografica dependiendo de la clase de shp
-			switch($this->class){
+			switch($this->clase){
 				case "RecordPolyLine":
 					array_push($campos, "`mysql_puntos` multilinestring not null");
 					array_push($indices, "SPATIAL INDEX(`mysql_puntos`)");

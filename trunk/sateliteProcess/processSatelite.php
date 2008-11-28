@@ -12,6 +12,9 @@ if(isset($_REQUEST["preview"])){
 		window.location = "processSatelite.php?start=1";
 	</script>
 	<?
+}elseif(isset($_REQUEST["insert_low_def"])){
+	$satelite = new SateliteProcessing();
+	$satelite->insertLowDefSateliteOriginals();
 }else{
 	die("no action defined (start, preview)");
 }

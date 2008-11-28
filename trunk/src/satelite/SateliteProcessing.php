@@ -170,5 +170,40 @@ class SateliteProcessing extends MapWareCore{
 		$query = "update satelite_originales set generada = 1 where clave = '".$this->resources["clave"]."'";
 		mysql_query($query) or die($query);
 	}
+	
+	function insertLowDefSateliteOriginals(){
+		//cargar los shape files
+		$shp = new ShapeFile(SATELITE_RESOURCES."low_def_nacional/gradicula 2008.shp") or die("no gradicula shp"); // along this file the class will use file.shx and file.dbf
+		
+		if(isset($_REQUEST['preview'])){
+			echo "<pre>";
+			print_r( $shp->records);
+			echo "</pre>";
+			$xmin = 1000;
+			$xmax = -10000;
+			$ymax = -1000;
+			$ymin = 1000;
+			for($i=0; $i<count($shp->records); $i++){
+				$shp_data = $shp->records[$i]->shp_data;
+				$xmin = min($xmin, $shp_data["xmin"]);
+				$xmax = max($xmax, $shp_data["xmax"]);
+				$ymin = min($ymin, $shp_data["ymin"]);
+				$ymax = max($ymax, $shp_data["ymax"]);
+			}
+			die("xmin = $xmin, xmax = $xmax, ymax = $ymax, ymin = $ymin");
+		}
+		if(isset($_REQUEST['start'])){
+			for($i=0; $i<count($shp->records); $i++){
+				$dbf_data = $shp->records[$i]->dbf_data;
+				$query = "insert into satelite_originales 
+				(nombre, folder, filename, imagename, hd, indice)
+				values
+				('low_def_nacional".$this->limpiar($dbf_data["IMG"])."', 'low_def_nacional', 'gradicula 2008', 'img_".str_replace("-", "_", $this->limpiar($dbf_data["IMG"]))."', 0, $i)";
+				mysql_query($query) or die($query);
+			}
+		}else{
+			die("start tiene que esatr definido");
+		}
+	}
 }
 ?>	

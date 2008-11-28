@@ -26,7 +26,7 @@ class ProcessShapeFile extends MapWareCore{
 		$this->table = mysql_fetch_array($res);	
 		//si existe contiudar creando un insert object
 		$this->insertShp = new InsertShapeFile(
-			$this->shp["id"], "../shapeFiles/".$this->shp["url"], 
+			$this->shp["id"], $this->shp["url"], 
 			$this->table["table_name"], $this->table["labelOrder"] != 0, explode(",", $this->table["catalogos"]), 
 			$this->table["crearImagenesFromNivel"], $this->table["crearImagenesToNivel"],
 			$this->table["drawLayerOrder"] != 0, $this->shp["campoClave"]
