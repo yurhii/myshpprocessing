@@ -7,6 +7,12 @@ $core = new MapWareCore();
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>SHP Processing</title>
+<script type="text/javascript">
+function abrirCreateLabels(){
+	window.open("labelingProcess/createLabels.php?nivel=2");
+	window.location = "labelingProcess/createLabels.php?nivel=1";
+}
+</script>
 </head>
 
 <body>
@@ -15,6 +21,8 @@ $core = new MapWareCore();
 <div><a href="amdin_console/altaBajaShpFiles.php">Dar de alta un nuevo shp file</a></div>
 
 <div><a href="shpProcess/insertNextShp.php">Comenzar a procesar SHP's</a></div>
+
+<div><a style="cursor:pointer;" href="#" onclick="abrirCreateLabels()">Comenzar el creado de labels</a></div>
 
 <div><a href="amdin_console/path_tipo_manager.php">Administrar colores, tama&ntilde;os y orden de paths</a></div>
 </body>

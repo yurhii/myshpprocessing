@@ -77,6 +77,9 @@
             $this->fp = fopen($this->file_name, "rb");
 			$this->_fetchShpBasicConfiguration();
 			fseek($this->fp, 100);
+			if(! $this->fp){
+				return $this->setError( sprintf(ERROR_FILE_NOT_FOUND, $file_name) );
+			}
         }
 		
 		function fetchAllRecords(){
