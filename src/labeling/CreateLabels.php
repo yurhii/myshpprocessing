@@ -170,7 +170,7 @@ class CreateLabels extends MapWareCore {
 		$poligonos = mysql_query($query) or die($query);
 		while($row = mysql_fetch_array($poligonos)){
 			//poligono en mayusculas y minusculas
-			$nombre = $this->toUpperLower($row["nombre"]);
+			$nombre = $this->toUpperLower($this->limpiar($row["nombre"]));
 			//coordenadas x, y del centro del poligono
 			$xy = array($row["centroX"], $row["centroY"]);
 			$size = $row["size"];
@@ -258,6 +258,8 @@ class CreateLabels extends MapWareCore {
 		'".$this->nivel."', '".$this->table_name."', '".$row["clave"]."', '".$parte."_".$indice."', '$labelValue', $polygon  )
 		ON DUPLICATE KEY UPDATE clean = '1'";
 		mysql_query($query) or die($query);
+		//vemos si se llevo a cabo un insert o un update
+		$was_insert = ($this->nextAutoIndex == mysql_insert_id());
 		if(isset($box2["text"]) && $box2["text"] != ""){
 			//insert label asociado a box2
 			$query = "INSERT INTO  `labels` 
@@ -274,12 +276,14 @@ class CreateLabels extends MapWareCore {
 		//sacamos las dimensiones de los bounds de la caja para crear las imagenes asociadas
 		$upperLeft = $this->getCuadroFromPointAtNivel(min($p1xmin, $p2xmin), min($p1ymin, $p2ymin), $this->nivel);
 		$lowerRight = $this->getCuadroFromPointAtNivel(max($p1xmax, $p2xmax), max($p1ymax, $p2ymax), $this->nivel);
-		$this->crearGuardarImagenes($upperLeft, $lowerRight, $this->nivel, $this->nextAutoIndex, "labels", 0);
-		//aumentamos el autoindex
-		if(isset($box2["text"]) && $box2["text"] != ""){
-			$this->nextAutoIndex = $this->nextAutoIndex + 2;
-		}else{
-			$this->nextAutoIndex = $this->nextAutoIndex + 1;
+		if($was_insert){
+			$this->crearGuardarImagenes($upperLeft, $lowerRight, $this->nivel, $this->nextAutoIndex, "labels", 0);
+			//aumentamos el autoindex
+			if(isset($box2["text"]) && $box2["text"] != ""){
+				$this->nextAutoIndex = $this->nextAutoIndex + 2;
+			}else{
+				$this->nextAutoIndex = $this->nextAutoIndex + 1;
+			}
 		}
 	}
 	function moverAlOrigen($box){
