@@ -14,7 +14,7 @@ if($nivel < $clean->nivelMaximoMapa - 1){
 } elseif($nivel == $clean->nivelMaximoMapa){
 	?>
 	<script type="text/javascript">
-	window.location = "../drawing/drawingController.php";
+	window.location = "../drawingProcess/drawingController.php";
 	</script>
 	<?
 }

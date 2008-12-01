@@ -85,7 +85,7 @@ class CreateLabels extends MapWareCore {
 					$p0  = explode(" ", $puntos[$n-1]);
 					$p1 = explode(" ", $puntos[$n]);
 					$longitud_segmento = $this->distancia($p0[0], $p0[1], $p1[0], $p1[1]); 
-					if($longitud_segmento > $longitud_mayor){
+					if($longitud_segmento >= $longitud_mayor){
 						$longitud_mayor = $longitud_segmento;
 						$segmento_mayor["p0"] = $p0;
 						$segmento_mayor["p1"] = $p1;
@@ -255,11 +255,13 @@ class CreateLabels extends MapWareCore {
 		`nivel`, `table_name`, `objeto_clave`, `identifier`, `labelValue`, `mysql_puntos`) 
 		VALUES 
 		( ".$this->nextAutoIndex.", '".$box1["x"]."', '".$box1["y"]."', $p1xmax, $p1xmin, $p1ymax, $p1ymin, '".$box1["angle"]."', '".$box1["text"]."', '".$this->getFontsize($this->nivel)."', 
-		'".$this->nivel."', '".$this->table_name."', '".$row["clave"]."', '".$parte."_".$indice."', '$labelValue', $polygon  )
-		ON DUPLICATE KEY UPDATE clean = '1'";
-		mysql_query($query) or die($query);
+		'".$this->nivel."', '".$this->table_name."', '".$row["clave"]."', '".$parte."_".$indice."', '$labelValue', $polygon  )";
 		//vemos si se llevo a cabo un insert o un update
-		$was_insert = ($this->nextAutoIndex == mysql_insert_id());
+		$was_insert = mysql_query($query);
+		if(!$was_insert){
+			$query = "update labels set clean = '1' where clave = '".$this->nextAutoIndex."'";
+			mysql_query($query) or die($query);
+		}
 		if(isset($box2["text"]) && $box2["text"] != ""){
 			//insert label asociado a box2
 			$query = "INSERT INTO  `labels` 
