@@ -17,19 +17,14 @@ while($row = mysql_fetch_array($res)){
 if($nivel < $core->nivelMaximoMapa - 1){
 	?>
 	<script type="text/javascript">
-	window.location = "createLabels.php?nivel=<? echo $nivel+2; ?>";
+	window.location = "createLabels.php?nivel=<? echo $nivel+1; ?>";
 	</script>
 	<?
 } elseif($nivel == $core->nivelMaximoMapa || $nivel == $core->nivelMaximoMapa - 1){
 	?>
 	<script type="text/javascript">
-	window.location = "cleanLabels.php?nivel=<?
-	if($nivel % 2 == 0){
-		echo 2;
-	}else{
-		echo 1;
-	} 
-	?>";
+	window.open("cleanLabels.php?nivel=2");
+	window.location = "cleanLabels.php?nivel=1";
 	</script>
 	<?
 }

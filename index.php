@@ -9,7 +9,6 @@ $core = new MapWareCore();
 <title>SHP Processing</title>
 <script type="text/javascript">
 function abrirCreateLabels(){
-	window.open("labelingProcess/createLabels.php?nivel=2");
 	window.location = "labelingProcess/createLabels.php?nivel=1";
 }
 </script>
