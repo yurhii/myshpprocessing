@@ -34,6 +34,7 @@ class CleanLabels extends MapWareCore {
 		$query = "DROP TABLE `labels_memory_$this->nivel`";
 		mysql_query($query);
 		$query = "CREATE TABLE `labels_memory_$this->nivel` (
+		  `order_id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		  `id` int(11) NOT NULL,
 		  `clave` int(11) NOT NULL,
 		  `xmax` int(11) NOT NULL,
@@ -44,7 +45,7 @@ class CleanLabels extends MapWareCore {
 		  `nivel` int(11) NOT NULL,
 		  `table_name` varchar(100) NOT NULL,
 		  `clean` enum('0','1','2') NOT NULL default '1',
-		  PRIMARY KEY (`id`),
+		  KEY `id` (`id`),
 		  KEY `nivel` (`nivel`),
 		  KEY `tipo` (`table_name`),
 		  KEY `grupo` (`clave`),
@@ -57,20 +58,21 @@ class CleanLabels extends MapWareCore {
 		) ENGINE=MEMORY  DEFAULT CHARSET=utf8";
 		mysql_query($query) or die($query);
 		$query = "insert into `labels_memory_$this->nivel` 
-		select id, clave, xmax, xmin, ymax, ymin, text, nivel, table_name, clean
+		select null as order_id, id, clave, xmax, xmin, ymax, ymin, text, nivel, table_name, clean
 		from labels
 		where nivel = $this->nivel and clean = '1'
 		order by labelValue asc";
 		mysql_query($query) or die($query);
 	}
 	function startCleaning(){
-		$query = "select memory.clave, memory.xmax, memory.xmin, memory.ymax, memory.ymin, 
-		memory.clean, astext(mysql_puntos) as puntos,
+		$query = "select memoria.clave, memoria.xmax, memoria.xmin, memoria.ymax, memoria.ymin, 
+		memoria.clean, astext(mysql_puntos) as puntos,
 		astext(envelope(mysql_puntos)) as boundingBox, 
-		memory.table_name, memory.`text`
-		from `labels_memory_$this->nivel` as memory
-		join labels on labels.id = memory.id
-		where memory.nivel = '$this->nivel' and memory.clean = '1'";
+		memoria.table_name, memoria.`text`
+		from `labels_memory_$this->nivel` as memoria
+		join labels on labels.id = memoria.id
+		where memoria.clean = '1'
+		ORDER BY order_id";
 		$res = mysql_query($query) or die($query);
 		error_log("empezamos");
 		while($new = mysql_fetch_array($res)){

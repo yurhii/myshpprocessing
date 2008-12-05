@@ -34,11 +34,11 @@ class DrawImage extends MapWareCore{
 JOIN areas_urbanas_por_imagen ON areas_urbanas_por_imagen.i = imagenes.i
 AND areas_urbanas_por_imagen.j = imagenes.j
 AND areas_urbanas_por_imagen.nivel = imagenes.nivel
-WHERE  areas_urbanas_por_imagen.clave =  'AU_BSIGEO_533'
-		AND `imagenes`.`nivel` = '$this->nivel' 
+WHERE   `imagenes`.`nivel` = '$this->nivel' 
 		AND `aDibujar` = '1' 
 		AND `cpu` = '".$this->cpu."'
 		LIMIT ".$this->imagenes_por_request;
+		//solo DF ::: areas_urbanas_por_imagen.clave =  'AU_BSIGEO_533' AND
 		//AND MBRIntersects(mysql_puntos, (select mysql_puntos from areas_urbanas where clave = 'AU_BSIGEO_533')) = 1
 		$imagenes = mysql_query($query) or die($query);
 		if(mysql_num_rows($imagenes) == 0){
