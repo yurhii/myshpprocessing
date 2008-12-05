@@ -20,7 +20,7 @@ if($nivel < $core->nivelMaximoMapa - 1){
 	window.location = "createLabels.php?nivel=<? echo $nivel+1; ?>";
 	</script>
 	<?
-} elseif($nivel == $core->nivelMaximoMapa || $nivel == $core->nivelMaximoMapa - 1){
+} elseif($nivel == $core->nivelMaximoMapa){
 	?>
 	<script type="text/javascript">
 	window.open("cleanLabels.php?nivel=2");

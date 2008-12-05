@@ -24,5 +24,7 @@ function abrirCreateLabels(){
 <div><a style="cursor:pointer;" href="#" onclick="abrirCreateLabels()">Comenzar el creado de labels</a></div>
 
 <div><a href="amdin_console/path_tipo_manager.php">Administrar colores, tama&ntilde;os y orden de paths</a></div>
+
+<div><a href="drawingProcess/drawingController.php">Comenzar dibujado</a></div>
 </body>
 </html>

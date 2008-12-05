@@ -11,7 +11,6 @@ ini_set("include_path", ini_get("include_path") . ":../src");
 require_once("MapWareCore.php");
 $nivel = isset($_REQUEST["nivel"]) ? $_REQUEST["nivel"] : 1;
 $core = new MapWareCore();
-
 $table_name = "calles";
 
 //ver si existe la vista de paths ordenada por el pathCampoTipo de la tabla
@@ -73,7 +72,7 @@ if($viewExists == 0 || $cuenta == false || mysql_num_rows($cuenta) == 0){
 function openDrawing(cpu){
 	port = (cpu % 2 == 0) ? "" : ":8888";
 	port = ":8888";
-	window.open("http://localhost"+port+"/MapWare/processing/drawing/drawImage.php?nivel=<? echo $nivel; ?>&cpu="+cpu);
+	window.open("http://localhost"+port+"/MapWare/shpProcessing/drawingProcess/drawImage.php?nivel=<? echo $nivel; ?>&cpu="+cpu);
 }
 for(i=1; i<=7 ; i++){
 	openDrawing(i);
