@@ -481,7 +481,7 @@ class InsertShapeFile extends MapWareCore{
 			/*********Crear table de objetos por imagen ********/
 			//para el caso de paths dividimos la tabla por imagen en una por cada nivel apra evitar saturacion
 			if($this->clase == "RecordPolyLine"){
-				for($i = $this->nivelFinalDeReferencia; $i <= $this->nivelFinalDeReferencia; $i++){
+				for($i = $this->nivelInicialDeReferencia; $i <= $this->nivelFinalDeReferencia; $i++){
 					$query = "CREATE TABLE  `".$this->table_name."_por_imagen_".$i."` (
 					`clave` VARCHAR( 255 ) NOT NULL ,
 					`i` INT NOT NULL ,
