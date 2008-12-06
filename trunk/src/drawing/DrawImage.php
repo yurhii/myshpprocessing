@@ -134,7 +134,7 @@ WHERE   `imagenes`.`nivel` = '$this->nivel'
 		//sacar los tipos de paths asociados a esta tabla
 		$query = "SELECT `paths_tipos`.tipo_id, l_r.longitud_minima FROM `paths_tipos`
 		join `paths_tipos__length__restrictions` as l_r on l_r.path_tipo_id = paths_tipos.id
-		WHERE `table_name` = '".$this->layer["table_name"]."'
+		WHERE `table_name` = '".$this->layer["table_name"]."' and paths_tipos.drawOrder > 0
 		AND l_r.nivel = '".$this->nivel."'";
 		$path_tipos = mysql_query($query) or die($query);
 		//si hay paths a dibujar a este nivel continuamos
@@ -150,11 +150,11 @@ WHERE   `imagenes`.`nivel` = '$this->nivel'
 			ON `thicks`.`path_tipo_id` = `paths_tipos`.`id` and `thicks`.`nivel` = '".$this->nivel."'
 			JOIN `paths_tipos__length__restrictions` as `length`
 			ON `length`.`path_tipo_id` = `paths_tipos`.`id` AND `length`.`nivel` = '".$this->nivel."'
-			join ".$this->layer["table_name"]."_por_imagen on ".$this->layer["table_name"]."_por_imagen.clave = `".$this->layer["table_name"]."_memory$table_memory_index`.clave
+			join ".$this->layer["table_name"]."_por_imagen_$this->nivel on ".$this->layer["table_name"]."_por_imagen_$this->nivel.clave = `".$this->layer["table_name"]."_memory$table_memory_index`.clave
 			WHERE 
-			".$this->layer["table_name"]."_por_imagen.i = ".$this->image["i"]." AND
-			".$this->layer["table_name"]."_por_imagen.j = ".$this->image["j"]." AND
-			".$this->layer["table_name"]."_por_imagen.nivel = '".$this->nivel."'
+			".$this->layer["table_name"]."_por_imagen_$this->nivel.i = ".$this->image["i"]." AND
+			".$this->layer["table_name"]."_por_imagen_$this->nivel.j = ".$this->image["j"]." AND
+			".$this->layer["table_name"]."_por_imagen_$this->nivel.nivel = '".$this->nivel."'
 			AND (";
 			//MBRIntersects(`".$this->layer["table_name"]."`.mysql_puntos, geomfromtext('".$this->image["mysql_puntos_text"]."') ) = '1'
 			//filtrar por longitud

@@ -479,19 +479,38 @@ class InsertShapeFile extends MapWareCore{
 			$query .= " ) ENGINE = ".$this->engine;
 			mysql_query($query) or die($query);
 			/*********Crear table de objetos por imagen ********/
-			$query = "CREATE TABLE  `".$this->table_name."_por_imagen` (
-			`clave` VARCHAR( 255 ) NOT NULL ,
-			`i` INT NOT NULL ,
-			`j` INT NOT NULL ,
-			`nivel` int(2) NOT NULL,
-			PRIMARY KEY(
-			     `clave`,
-			     `i`,
-			     `j`,
-			     `nivel`),
-			KEY(i, j, nivel)
-			) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
-			mysql_query($query) or die($query);
+			//para el caso de paths dividimos la tabla por imagen en una por cada nivel apra evitar saturacion
+			if($this->clase == "RecordPolyLine"){
+				for($i = $this->nivelFinalDeReferencia; $i <= $this->nivelFinalDeReferencia; $i++){
+					$query = "CREATE TABLE  `".$this->table_name."_por_imagen_".$i."` (
+					`clave` VARCHAR( 255 ) NOT NULL ,
+					`i` INT NOT NULL ,
+					`j` INT NOT NULL ,
+					`nivel` int(2) NOT NULL,
+					PRIMARY KEY(
+					     `clave`,
+					     `i`,
+					     `j`,
+					     `nivel`),
+					KEY(i, j, nivel)
+					) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
+					mysql_query($query) or die($query);
+				}
+			}else{
+				$query = "CREATE TABLE  `".$this->table_name."_por_imagen` (
+				`clave` VARCHAR( 255 ) NOT NULL ,
+				`i` INT NOT NULL ,
+				`j` INT NOT NULL ,
+				`nivel` int(2) NOT NULL,
+				PRIMARY KEY(
+				     `clave`,
+				     `i`,
+				     `j`,
+				     `nivel`),
+				KEY(i, j, nivel)
+				) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
+				mysql_query($query) or die($query);
+			}
 			
 		}
 	}
