@@ -233,7 +233,7 @@ class MapWareCore{
 					$this->insertarImagenSatelite($clave_imagen, $img_xmin, $img_xmax, $img_ymin, $img_ymax, $nivel, $i, $j);
 				}
 				//ver que clase de tabla es 
-				$query = "select class from tables where table_name = $table_name_asociado";
+				$query = "select class from tables where table_name = '$table_name_asociado'";
 				$r = mysql_query($query) or die($query);
 				if(mysql_num_rows($r) != 0){
 					$table_class = mysql_fetch_array($r);
