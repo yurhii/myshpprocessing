@@ -41,6 +41,7 @@ if($viewExists == 0 || $cuenta == false || mysql_num_rows($cuenta) == 0){
 	longitud, grupo, clave
 	from `".$table_name."`
 	JOIN `paths_tipos` on `paths_tipos`.`tipo_id` = `".$table_name."`.`tipo_id`
+	where drawOrder > 0
 	ORDER BY `paths_tipos`.`drawOrder` desc";
 	mysql_query($query) or die($query);
 	
@@ -65,6 +66,7 @@ if($viewExists == 0 || $cuenta == false || mysql_num_rows($cuenta) == 0){
 	longitud, grupo, clave
 	from `".$table_name."`
 	JOIN `paths_tipos` on `paths_tipos`.`tipo_id` = `".$table_name."`.`tipo_id`
+	where drawOrder > 0
 	ORDER BY `paths_tipos`.`drawOrder` desc";
 	mysql_query($query) or die($query);
 }

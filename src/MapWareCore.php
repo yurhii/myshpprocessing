@@ -232,11 +232,26 @@ class MapWareCore{
 				}elseif($tipoImagen == "satelite"){
 					$this->insertarImagenSatelite($clave_imagen, $img_xmin, $img_xmax, $img_ymin, $img_ymax, $nivel, $i, $j);
 				}
-				
-				$query = "insert into ".$table_name_asociado."_por_imagen 
-				(clave, i, j, nivel)
-				values
-				('$clave_asociada', '$i', '$j', '$nivel')";
+				//ver que clase de tabla es 
+				$query = "select clase from tables where table_name = $table_name_asociado";
+				$r = mysql_query($query) or die($query);
+				if(mysql_num_rows($r) != 0){
+					$table_class = mysql_fetch_array($r);
+				}else{
+					$table_class = false;
+				}
+				//como para los paths esta desagregada la tabla de elementos por imagen tenemos que saberlo para poder meterlos
+				if($table_class == false || $table_class["class"] != "RecordPolyLine"){
+					$query = "insert into ".$table_name_asociado."_por_imagen 
+					(clave, i, j, nivel)
+					values
+					('$clave_asociada', '$i', '$j', '$nivel')";
+				}else{
+					$query = "insert into ".$table_name_asociado."_por_imagen_".$nivel."
+					(clave, i, j, nivel)
+					values
+					('$clave_asociada', '$i', '$j', '$nivel')";
+				}
 				mysql_query($query);
 			}
 		}
