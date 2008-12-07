@@ -13,7 +13,7 @@ class SateliteProcessing extends MapWareCore{
 		order by hd asc, imagename asc limit 1";
 		$res = mysql_query($query) or die($query);
 		$this->resources = mysql_fetch_array($res) or die("Terminado<br />");
-		$this->shp = new ShapeFile("../satelite_resources/".$this->resources["folder"]."/".$this->resources["filename"].".shp") or die("no shp");
+		$this->shp = new ShapeFile(SATELITE_RESOURCES.$this->resources["folder"]."/".$this->resources["filename"].".shp") or die("no shp");
 		// along this file the class will use file.shx and file.dbf
 		// Let's see all the records:
 		$this->shp_data = $this->shp->records[$this->resources["indice"]]->shp_data;
