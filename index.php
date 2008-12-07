@@ -26,5 +26,7 @@ function abrirCreateLabels(){
 <div><a href="amdin_console/path_tipo_manager.php">Administrar colores, tama&ntilde;os y orden de paths</a></div>
 
 <div><a href="drawingProcess/drawingController.php">Comenzar dibujado</a></div>
+
+<div><a href="sateliteProcess/processSatelite.php">Comenzar procesado de satelite</a></div>
 </body>
 </html>
