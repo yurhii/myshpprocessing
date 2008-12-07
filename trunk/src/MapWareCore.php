@@ -441,6 +441,7 @@ class MapWareCore{
 		  KEY `mapa_exists` (`mapa_exists`),
 		  KEY `satelite_exists` (`satelite_exists`),
 		  KEY `hibrido_exists` (`hibrido_exists`),
+		  KEY `nivel_cpu_aDibujar` (`nivel`, `cpu`, `aDibujar`),
 		  SPATIAL KEY `mysql_puntos` (`mysql_puntos`),
 		  KEY `aDibujar` (`aDibujar`),
 		  KEY `nivel` (`nivel`),
