@@ -41,7 +41,7 @@ class SateliteProcessing extends MapWareCore{
 		array_push($aPuntos, $punto);
 		
 		//cargar laimagen
-		$imagePath = "../satelite_resources/".$this->resources["folder"]."/".$this->resources["imagename"].".jpg";
+		$imagePath = SATELITE_RESOURCES.$this->resources["folder"]."/".$this->resources["imagename"].".jpg";
 		$image_original = imagecreatefromjpeg($imagePath) or die("no image defined");
 		//definir los niveles en los cuales se va a generar esta imagen de satelite
 		$nivelInicial = ($this->resources["hd"] == 1) ? 7 : 1;
