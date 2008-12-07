@@ -1,5 +1,5 @@
 <?PHP	
-define("IMAGE_MAPWARE_URL", "http://localhost/mapware/Site/images/satelite.jpg.php");
+define("IMAGE_MAPWARE_URL", "http://localhost:8888/mapware/Site/images/satelite.jpg.php");
 class SateliteProcessing extends MapWareCore{
 	var $shp_data;
 	var $dbf_data;
