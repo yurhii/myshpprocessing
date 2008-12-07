@@ -16,6 +16,6 @@ if(isset($_REQUEST["preview"])){
 	$satelite = new SateliteProcessing();
 	$satelite->insertLowDefSateliteOriginals();
 }else{
-	die("no action defined (start, preview)");
+	die("no action defined (start, preview, insert_low_def)");
 }
 ?>
