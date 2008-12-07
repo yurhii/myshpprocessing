@@ -1,4 +1,5 @@
 <?PHP	
+define("IMAGE_MAPWARE_URL", "http://localhost/mapware/Site/images/satelite.jpg.php");
 class SateliteProcessing extends MapWareCore{
 	var $shp_data;
 	var $dbf_data;
@@ -14,6 +15,7 @@ class SateliteProcessing extends MapWareCore{
 		$res = mysql_query($query) or die($query);
 		$this->resources = mysql_fetch_array($res) or die("Terminado<br />");
 		$this->shp = new ShapeFile(SATELITE_RESOURCES.$this->resources["folder"]."/".$this->resources["filename"].".shp") or die("no shp");
+		$this->shp->fetchAllRecords();
 		// along this file the class will use file.shx and file.dbf
 		// Let's see all the records:
 		$this->shp_data = $this->shp->records[$this->resources["indice"]]->shp_data;
@@ -65,7 +67,7 @@ class SateliteProcessing extends MapWareCore{
 			//escala correspondiente entre el pixelaje que debe tener y el real de la imagen de satelite
 			$escalaImagenSatelite = $info[0] / $pixelWidthSat;
 			//copio la imagen al tamaño que le corresponde en este nivel para evitar desfaces
-			$image = imagecreatetruecolor(round($info[0]/$escalaImagenSatelite), round($info[1]/$escalaImagenSatelite));
+			$image = imagecreatetruecolor(round($info[0]/$escalaImagenSatelite), round($info[1]/$escalaImagenSatelite)) or die("no se pudo crear la imagen para empezar");
 			imagecopyresampled($image, $image_original, 0, 0, 0, 0, round($info[0]/$escalaImagenSatelite), round($info[1]/$escalaImagenSatelite), $info[0], $info[1]) or die("no se pudo generar copia a nivel");
 			//
 			echo "************************Nivel".$nivel."<br />";
@@ -85,7 +87,7 @@ class SateliteProcessing extends MapWareCore{
 					//crear nueva imagen
 					if( mysql_num_rows($exists) != 0 ){
 						//en caso de que ya existiera antes una imagen de satelite asociada
-						$newImage = imagecreatefromjpeg("http://localhost/mapware/Site/images/satelite.jpg.php?clave=".$i."_".$j."_".$nivel);
+						$newImage = imagecreatefromjpeg(IMAGE_MAPWARE_URL."?clave=".$i."_".$j."_".$nivel);
 					}else{
 						$newImage = imagecreatetruecolor(200, 200);
 						//de ser hd copiar sobre una imagen de lowDef ampliada
@@ -99,7 +101,7 @@ class SateliteProcessing extends MapWareCore{
 							//que tantas veces es mas grande la newImage que la de baja resolucion que se va a sacar
 							$escala_ld = pow(2, $nivel-8);	
 							//sacar la imagen que se va a usar
-							$image_ld = imagecreatefromjpeg("http://localhost/mapware/Site/images/satelite.jpg.php?clave=".$lowDef_i."_".$lowDef_j."_8") or die("no image ld");
+							$image_ld = imagecreatefromjpeg(IMAGE_MAPWARE_URL."?clave=".$lowDef_i."_".$lowDef_j."_8") or die("no image ld");
 							//
 							$destX_ld = ($lowDef["xmin"] - $this->xmin - $square[0]*$this->squareSize*$this->escala) / $this->escala;
 							$destY_ld = ($lowDef["ymin"] - $this->ymin - $square[1]*$this->squareSize*$this->escala) / $this->escala;
