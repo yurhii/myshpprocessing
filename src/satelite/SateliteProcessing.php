@@ -174,6 +174,8 @@ class SateliteProcessing extends MapWareCore{
 	function insertLowDefSateliteOriginals(){
 		//cargar los shape files
 		$shp = new ShapeFile(SATELITE_RESOURCES."low_def_nacional/gradicula 2008.shp") or die("no gradicula shp"); // along this file the class will use file.shx and file.dbf
+		echo "insertLowDefSateliteOriginals</br>";
+		$shp->fetchAllRecords();
 		for($i=0; $i<count($shp->records); $i++){
 			$dbf_data = $shp->records[$i]->dbf_data;
 			$query = "insert into satelite_originales 

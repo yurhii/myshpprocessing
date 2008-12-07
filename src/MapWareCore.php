@@ -1,7 +1,7 @@
 <?PHP
 define("INFINITO", 10000000000);
 
-define("SATELITE_RESOURCES", "../satelite_resources/");
+define("SATELITE_RESOURCES", "../../satelite_resources/");
 
 define("SHAPE_FILES", "../../shapeFiles/");
 
