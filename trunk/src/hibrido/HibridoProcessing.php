@@ -27,7 +27,7 @@ class HibridoProcessing extends MapWareCore{
 		$query = "select imagenes.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
 		from imagenes
 		where imagenes.nivel = '$this->nivel'
-		and mapa_exists = '1' and hibrido_exists = '0'
+		and mapa_exists != '0' and hibrido_exists = '0'
 		AND `cpu` = '".$this->cpu."'
 		limit $this->imagenes_por_request";
 		$res = mysql_query($query) or die($query);
@@ -68,7 +68,7 @@ class HibridoProcessing extends MapWareCore{
 				where imagenes.nivel = '$this->nivel' 
 				and (`i` between ".($imageBounds["i_min"] - $this->bufferSize)." and ".($imageBounds["i_max"] + $this->bufferSize).") 
 				and (`j` between ".($imageBounds["j_min"] - $this->bufferSize)." and ".($imageBounds["j_max"] + $this->bufferSize).")
-				and mapa_exists = '1'";
+				and mapa_exists != '0'";
 				$res = mysql_query($query) or die($query);
 				$this->processImagesForHibrid($res);
 			}

@@ -86,7 +86,7 @@ class SateliteProcessing extends MapWareCore{
 					$square = array($i, $j);
 					//ver si ya existe una imagen en estas coordenadas
 					$query = "select * from imagenes
-					where satelite_exists = '1' and i = '$i' and j = '$j' and nivel = '$nivel'";
+					where satelite_exists != '0' and i = '$i' and j = '$j' and nivel = '$nivel'";
 					$exists = mysql_query($query) or die($query);
 					//crear nueva imagen
 					if( mysql_num_rows($exists) != 0 ){
