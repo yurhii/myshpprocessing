@@ -75,7 +75,7 @@ if($viewExists == 0 || $cuenta == false || mysql_num_rows($cuenta) == 0){
 function openDrawing(cpu){
 	port = (cpu % 2 == 0) ? "" : ":8888";
 	port = ":8888";
-	window.open("http://localhost"+port+"/MapWare/processing/hibrido/processHibrido.php?start=1&nivel=<? echo $nivel; ?>&cpu="+cpu);
+	window.open("http://localhost"+port+"/MapWare/shpProcessing/hibridoProcess/processHibrido.php?start=1&nivel=<? echo $nivel; ?>&cpu="+cpu);
 }
 for(i=1; i<=7 ; i++){
 	openDrawing(i);
