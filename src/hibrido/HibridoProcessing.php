@@ -1,7 +1,7 @@
 <?PHP	
 class HibridoProcessing extends MapWareCore{
 	
-	var $imagenes_por_request = 100;
+	var $imagenes_por_request = 200;
 	var $cpu;
 	
 	var $bufferSize;
