@@ -74,7 +74,7 @@
                 return $this->setError( sprintf(ERROR_FILE_NOT_FOUND, $file_name) );
             }
             //abrimos la comunicacion con el archivo
-            $this->fp = fopen($this->file_name, "rb");
+            $this->fp = fopen($this->file_name, "rb") or die("no shp fopen");
 			$this->_fetchShpBasicConfiguration();
 			fseek($this->fp, 100);
 			if(! $this->fp){

@@ -258,11 +258,13 @@ class MapWareCore{
 	}
 	function insertarImagenSatelite($clave_imagen, $img_xmin, $img_xmax, $img_ymin, $img_ymax, $nivel, $i, $j){
 		$polygon = "polygon(($img_xmin $img_ymin,$img_xmax $img_ymin,$img_xmax $img_ymax,$img_xmin $img_ymax,$img_xmin $img_ymin))";
+		//elegimos un cpu de los 7 disponibles at random
+		$cpu = rand(1, 7);
 		//intentamos guardar esta imagen nueva (puede fallar)
 		$query = "insert into imagenes 
-		( `i`, `j`, `nivel`, `mysql_puntos`, `aDibujar`) 
+		( `i`, `j`, `nivel`, `mysql_puntos`, `cpu`, `aDibujar`) 
 		values 
-		($i, $j, '$nivel', geomfromtext('$polygon'), '0')";
+		($i, $j, '$nivel', geomfromtext('$polygon'), '$cpu', '0')";
 		mysql_query($query);
 	}
 	function insertarImagenMapa($clave_imagen, $img_xmin, $img_xmax, $img_ymin, $img_ymax, $nivel, $i, $j){
