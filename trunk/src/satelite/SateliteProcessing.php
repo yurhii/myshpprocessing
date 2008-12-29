@@ -5,7 +5,8 @@ class SateliteProcessing extends MapWareCore{
 	var $dbf_data;
 	var $resources;
 	var $shp;
-	function SateliteProcessing(){
+	
+	function SateliteProcessing($continuarSinImportarSiNoHayResultados = false){
 		$this->openMySQLConn();
 		$this->defineMapWareBounds();
 		//extraer de la tabla de satelite_imagenes los insumos a generar
@@ -13,17 +14,19 @@ class SateliteProcessing extends MapWareCore{
 		where generada = 0
 		order by hd asc, imagename asc limit 1";
 		$res = mysql_query($query) or die($query);
-		$this->resources = mysql_fetch_array($res);
-		if(!$this->resources){
-			echo "no processing</br>";
-			return;
+		if(mysql_num_rows($res) == 0 && !$continuarSinImportarSiNoHayResultados){
+			die("terminado, no more images to process");
+		}elseif(!$continuarSinImportarSiNoHayResultados){
+			$this->resources = mysql_fetch_array($res);
+			//
+			$this->shp = new ShapeFile(SATELITE_RESOURCES.$this->resources["folder"]."/".$this->resources["filename"].".shp") or die("no shp");
+			$this->shp->fetchAllRecords();
+			// along this file the class will use file.shx and file.dbf
+			// Let's see all the records:
+			echo SATELITE_RESOURCES.$this->resources["folder"]."/".$this->resources["filename"].".shp"."</br>";
+			$this->shp_data = $this->shp->records[$this->resources["indice"]]->shp_data;
+			$this->dbf_data = $this->shp->records[$this->resources["indice"]]->dbf_data;
 		}
-		$this->shp = new ShapeFile(SATELITE_RESOURCES.$this->resources["folder"]."/".$this->resources["filename"].".shp") or die("no shp");
-		$this->shp->fetchAllRecords();
-		// along this file the class will use file.shx and file.dbf
-		// Let's see all the records:
-		$this->shp_data = $this->shp->records[$this->resources["indice"]]->shp_data;
-		$this->dbf_data = $this->shp->records[$this->resources["indice"]]->dbf_data;
 	}
 	function preview(){
 		echo "<pre>";
@@ -100,19 +103,24 @@ class SateliteProcessing extends MapWareCore{
 							// puede que sea cubierta por la imagen de hd en donde esta se encuentre
 							$lowDef_i = ceil( ($i+1)/pow(2, $nivel-8) ) - 1;
 							$lowDef_j = ceil( ($j+1)/pow(2, $nivel-8) ) - 1;
-							$query = "select xmin, ymin from imagenes where i = $lowDef_i and j = $lowDef_j and nivel = 8";
+							$query = "select 
+							X(POINTN( EXTERIORRING( ENVELOPE( mysql_puntos ) ) , 1 ) ) as xmin, 
+							Y(POINTN( EXTERIORRING( ENVELOPE( mysql_puntos ) ) , 1 ) ) as ymin 
+							from imagenes where i = $lowDef_i and j = $lowDef_j and nivel = 8";
 							$lowDef = mysql_fetch_array(mysql_query($query)) or die($query);
 							//que tantas veces es mas grande la newImage que la de baja resolucion que se va a sacar
 							$escala_ld = pow(2, $nivel-8);	
 							//sacar la imagen que se va a usar
-							$image_ld = imagecreatefromjpeg(IMAGE_MAPWARE_URL."?clave=".$lowDef_i."_".$lowDef_j."_8") or die("no image ld");
-							//
-							$destX_ld = ($lowDef["xmin"] - $this->xmin - $square[0]*$this->squareSize*$this->escala) / $this->escala;
-							$destY_ld = ($lowDef["ymin"] - $this->ymin - $square[1]*$this->squareSize*$this->escala) / $this->escala;
-							//			
-							$sourceX_ld = -1*$destX_ld;
-							$sourceY_ld = -1*$destY_ld;
-							imagecopyresampled($newImage, $image_ld, 0, 0, round($sourceX_ld/$escala_ld), round($sourceY_ld/$escala_ld), 200, 200, round(200/$escala_ld), round(200/$escala_ld)) or die("no copy resampled");
+							$image_ld = imagecreatefromjpeg(IMAGE_MAPWARE_URL."?clave=".$lowDef_i."_".$lowDef_j."_8");
+							if($image_ld != false){
+								//
+								$destX_ld = ($lowDef["xmin"] - $this->xmin - $square[0]*$this->squareSize*$this->escala) / $this->escala;
+								$destY_ld = ($lowDef["ymin"] - $this->ymin - $square[1]*$this->squareSize*$this->escala) / $this->escala;
+								//			
+								$sourceX_ld = -1*$destX_ld;
+								$sourceY_ld = -1*$destY_ld;
+								imagecopyresampled($newImage, $image_ld, 0, 0, round($sourceX_ld/$escala_ld), round($sourceY_ld/$escala_ld), 200, 200, round(200/$escala_ld), round(200/$escala_ld)) or die("no copy resampled");
+							}
 						}
 					}
 					//
@@ -176,18 +184,29 @@ class SateliteProcessing extends MapWareCore{
 		$query = "update satelite_originales set generada = 1 where clave = '".$this->resources["clave"]."'";
 		mysql_query($query) or die($query);
 	}
-	
-	function insertLowDefSateliteOriginals(){
+	function insertMosaicos($filename, $folder, $imagePrefix){
 		//cargar los shape files
-		$shp = new ShapeFile(SATELITE_RESOURCES."low_def_nacional/gradicula 2008.shp") or die("no gradicula shp"); // along this file the class will use file.shx and file.dbf
-		echo "insertLowDefSateliteOriginals</br>";
+		$shp = new ShapeFile(SATELITE_RESOURCES.$folder."/".$filename.".shp") or die("no gradicula shp"); // along this file the class will use file.shx and file.dbf
 		$shp->fetchAllRecords();
 		for($i=0; $i<count($shp->records); $i++){
 			$dbf_data = $shp->records[$i]->dbf_data;
 			$query = "insert into satelite_originales 
 			(nombre, folder, filename, imagename, hd, indice)
 			values
-			('low_def_nacional".$this->limpiar($dbf_data["IMG"])."', 'low_def_nacional', 'gradicula 2008', 'img_".str_replace("-", "_", $this->limpiar($dbf_data["IMG"]))."', 0, $i)";
+			('".$folder.$this->limpiar($dbf_data["CV_IMG"])."', '$folder', '$filename', '".$imagePrefix."_".strtolower($this->limpiar($dbf_data["CV_IMG"]))."', '1', $i)";
+			mysql_query($query) or die($query);
+		}
+	}
+	function insertLowDefSateliteOriginals(){
+		//cargar los shape files
+		$shp = new ShapeFile(SATELITE_RESOURCES."low_def_nacional/gradicula 2008.shp") or die("no gradicula shp"); // along this file the class will use file.shx and file.dbf
+		$shp->fetchAllRecords();
+		for($i=0; $i<count($shp->records); $i++){
+			$dbf_data = $shp->records[$i]->dbf_data;
+			$query = "insert into satelite_originales 
+			(nombre, folder, filename, imagename, hd, indice)
+			values
+			('low_def_nacional".$this->limpiar($dbf_data["IMG"])."', 'low_def_nacional', 'gradicula 2008', 'img_".str_replace("-", "_", $this->limpiar($dbf_data["IMG"]))."', '0', $i)";
 			mysql_query($query) or die($query);
 		}
 	}

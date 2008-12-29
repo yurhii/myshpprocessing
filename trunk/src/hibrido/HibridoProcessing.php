@@ -13,22 +13,29 @@ class HibridoProcessing extends MapWareCore{
 	var $imageCanvas;
 	var $square;
 	
+	var $tipoProcesamiento;
+	
 	var $nivel;
 	
-	function HibridoProcessing($nivel = 1, $cpuNumber = 1){
+	function HibridoProcessing($nivel = 1, $cpuNumber = 1, $tipoProcesamiento = 0){
 		$this->openMySQLConn();
 		$this->defineMapWareBounds();
 		$this->nivel = $nivel;
 		$this->cpu = $cpuNumber;
+		$this->tipoProcesamiento = $tipoProcesamiento;
 	}
 	function startProcessingAllNoMatchToOurSateliteAssets(){
 		$this->actualizarEscalaPorNivel($this->nivel);
 		
 		$query = "select imagenes.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
 		from imagenes
-		where imagenes.nivel = '$this->nivel'
-		and mapa_exists != '0' and hibrido_exists = '0'
-		AND `cpu` = '".$this->cpu."'
+		where imagenes.nivel = '$this->nivel'";
+		if($this->tipoProcesamiento == 0){
+			$query .= "and mapa_exists = '1' and hibrido_exists = '0'";
+		}else if ($this->tipoProcesamiento == 1){
+			$query .= "and mapa_exists = '2' and hibrido_exists = '0'";
+		}
+		$query .= "AND `cpu` = '".$this->cpu."'
 		limit $this->imagenes_por_request";
 		$res = mysql_query($query) or die($query);
 		$this->processImagesForHibrid($res);
@@ -67,8 +74,13 @@ class HibridoProcessing extends MapWareCore{
 				from imagenes
 				where imagenes.nivel = '$this->nivel' 
 				and (`i` between ".($imageBounds["i_min"] - $this->bufferSize)." and ".($imageBounds["i_max"] + $this->bufferSize).") 
-				and (`j` between ".($imageBounds["j_min"] - $this->bufferSize)." and ".($imageBounds["j_max"] + $this->bufferSize).")
-				and mapa_exists != '0'";
+				and (`j` between ".($imageBounds["j_min"] - $this->bufferSize)." and ".($imageBounds["j_max"] + $this->bufferSize).")";
+				if($this->tipoProcesamiento == 0){
+					$query .= "and mapa_exists = '1' and hibrido_exists = '0'";
+				}else if ($this->tipoProcesamiento == 1){
+					$query .= "and mapa_exists = '2' and hibrido_exists = '0'";
+				}
+				$query .= "AND `cpu` = '".$this->cpu."'";
 				$res = mysql_query($query) or die($query);
 				$this->processImagesForHibrid($res);
 			}
