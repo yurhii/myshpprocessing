@@ -28,5 +28,7 @@ function abrirCreateLabels(){
 <div><a href="drawingProcess/drawingController.php">Comenzar dibujado</a></div>
 
 <div><a href="sateliteProcess/processSatelite.php">Comenzar procesado de satelite</a></div>
+
+<div><a href="hibridoProcess">Comenzar procesado de hibrido</a></div>
 </body>
 </html>

@@ -590,7 +590,8 @@ class MapWareCore{
 		  `j` int(11) NOT NULL,
 		  `nivel` int(2) NOT NULL,
 		  PRIMARY KEY  (`clave`,`i`,`j`,`nivel`),
-		  KEY `i` (`i`,`j`,`nivel`)
+		  KEY `i` (`i`,`j`,`nivel`),
+		  KEY `nivel` (`nivel`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 		mysql_query($query);
 		
