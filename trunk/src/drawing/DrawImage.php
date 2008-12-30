@@ -84,7 +84,7 @@ WHERE   `imagenes`.`nivel` = '$this->nivel'
 			$file = mysql_real_escape_string(file_get_contents($archivo));
 			//guardar en base de datos que la imagen ya fue dibujada
 			$query = "UPDATE `imagenes`
-			SET `aDibujar` = '0', `fecha_dibujado` = CURRENT_TIMESTAMP, `mapa` = '$file', `mapa_exists` = '1'
+			SET `aDibujar` = '0', `fecha_dibujado` = CURRENT_TIMESTAMP, `mapa` = '$file', `mapa_exists` = '1', `hibrido_exists` = '0'
 			WHERE `i` = '".$this->image["i"]."' and `j` = '".$this->image["j"]."' 
 			and `nivel` = '".$this->image["nivel"]."'";
 			mysql_query($query) or die($query);

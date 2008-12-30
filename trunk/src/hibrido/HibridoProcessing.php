@@ -44,51 +44,24 @@ class HibridoProcessing extends MapWareCore{
 	}
 	
 	function startProcessingToMatchOurSateliteAssets(){
-		//sacar una imagen de satelite a convertir a hibrido que no haya sido convertida antes
-		$query = "select * from satelite_originales 
-		where hibrido = 0 and generada = 1 
-		limit 1";
-		$satelites = mysql_query($query) or die($query);
-		$resource = mysql_fetch_array($satelites) or die("no hay satelites para hacer hibrido");
-		//el buffer de cuatro imagenes es para que al ver el final de una imagen de sat de hd no se corten las calles
-		$this->bufferSize = ($resource == 1) ? 4 : 1;
-		//definir los niveles en los cuales se va a generar esta imagen de satelite
-		$this->nivelInicial = ($resource == 1) ? 7 : 1;
-		$this->nivelFinal = ($resource == 1) ? 14 : 9;
+		$this->actualizarEscalaPorNivel($this->nivel);
 		
-		//loop sobre los niveles
-		for($this->nivel = $this->nivelInicial; $this->nivel <= $this->nivelFinal; $this->nivel++){
-			//actualizar datos globales por nivel
-			$this->actualizarEscalaPorNivel($this->nivel);
-			//sacar los limites de la imagen satelital a dibujar 
-			$query = "select count(*) as total, min(imagenes.i) i_min, max(imagenes.i) i_max, 
-			min(imagenes.j) j_min, max(imagenes.j) j_max
-			from imagenes
-			join satelite_originales_por_imagen on satelite_originales_por_imagen.i = imagenes.i
-				and satelite_originales_por_imagen.j = imagenes.j and satelite_originales_por_imagen.nivel = imagenes.nivel
-			where satelite_originales_por_imagen.clave = ".$resource["clave"]." and imagenes.nivel = $this->nivel";
-			$imageBounds = mysql_fetch_array(mysql_query($query)) or die($query);
-			if($imageBounds["total"] != 0){
-				//ahora si con el buffer sacar todas las imagenes en donde se generara el hibrido
-				$query = "select imagenes.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
-				from imagenes
-				where imagenes.nivel = '$this->nivel' 
-				and (`i` between ".($imageBounds["i_min"] - $this->bufferSize)." and ".($imageBounds["i_max"] + $this->bufferSize).") 
-				and (`j` between ".($imageBounds["j_min"] - $this->bufferSize)." and ".($imageBounds["j_max"] + $this->bufferSize).")";
-				if($this->tipoProcesamiento == 0){
-					$query .= "and mapa_exists = '1' and hibrido_exists = '0'";
-				}else if ($this->tipoProcesamiento == 1){
-					$query .= "and mapa_exists = '2' and hibrido_exists = '0'";
-				}
-				$query .= "AND `cpu` = '".$this->cpu."'";
-				$res = mysql_query($query) or die($query);
-				$this->processImagesForHibrid($res);
-			}
+		$query = "select imagenes.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
+		from satelite_originales_por_imagen
+		join imagenes on satelite_originales_por_imagen.i = imagenes.i
+			and satelite_originales_por_imagen.j = imagenes.j and satelite_originales_por_imagen.nivel = imagenes.nivel
+		where imagenes.nivel = '$this->nivel'";
+		if($this->tipoProcesamiento == 0){
+			$query .= "and mapa_exists = '1' and hibrido_exists = '0'";
+		}else if ($this->tipoProcesamiento == 1){
+			$query .= "and mapa_exists = '2' and hibrido_exists = '0'";
 		}
-		//actualizar en satelite_imagenes que ya se compelto el hibrido
-		$query = "update satelite_originales set hibrido = '1' 
-		where clave = ".$resource["clave"];
-		mysql_query($query) or die($query);
+		$query .= "AND `cpu` = '".$this->cpu."'
+		limit $this->imagenes_por_request";
+		$res = mysql_query($query) or die($query);
+		$this->processImagesForHibrid($res);
+		//
+		return (mysql_num_rows($res) != 0);
 	}
 	
 	function processImagesForHibrid($res){
