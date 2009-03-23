@@ -19,6 +19,8 @@ function abrirCreateLabels(){
 <h1>Administrador de procesamiento de shp</h1>
 <div><a href="amdin_console/altaBajaShpFiles.php">Dar de alta un nuevo shp file</a></div>
 
+<div><a href="amdin_console/procesarBajasFromDBF.php">Baja de claves from dbf</a></div>
+
 <div><a href="shpProcess/insertNextShp.php">Comenzar a procesar SHP's</a></div>
 
 <div><a style="cursor:pointer;" href="#" onclick="abrirCreateLabels()">Comenzar el creado de labels</a></div>

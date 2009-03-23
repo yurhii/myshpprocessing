@@ -103,17 +103,6 @@ class InsertShapeFile extends MapWareCore{
 		}
 	}
 	
-	function bajaDeClavesFromDBF($dbfurl){
-		$dbf = dbase_open($dbfurl, 0);
-		for ($i = 0; $i <= dbase_numrecords($dbf); $i++) {
-			$dbf_data = dbase_get_record_with_names($dbf, $i);
-			echo "<pre>";
-			print_r($dbf_data);
-			echo "</pre>";
-			die("");
-		}
-	}
-	
 	function insertRecordPolyLine($shp_data, $dbf_data){
 		$aPartes = array();
 		for($k=0; $k < count($shp_data["parts"]); $k++){
