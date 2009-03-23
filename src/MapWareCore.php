@@ -8,6 +8,7 @@ define("SHAPE_FILES", "../../shapeFiles/");
 include_once("conexion/ConexionMySQL.php");
 //shp
 include_once("shp/ProcessShapeFile.php");
+include_once("shp/BajaDeClaves.php");
 
 include_once("labeling/CreateLabels.php"); 
 include_once("labeling/CleanLabels.php"); 
