@@ -14,7 +14,7 @@ while($row = mysql_fetch_array($res)){
 		$process->closeMySQLConn();
 	}
 }
-if($nivel < $core->nivelMaximoMapa - 1){
+if($nivel < $core->nivelMaximoMapa){
 	?>
 	<script type="text/javascript">
 	window.location = "createLabels.php?nivel=<? echo $nivel+1; ?>";
