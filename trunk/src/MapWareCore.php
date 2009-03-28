@@ -276,7 +276,8 @@ class MapWareCore{
 		$query = "insert into imagenes 
 		( `i`, `j`, `nivel`, `mysql_puntos`, `cpu`, `aDibujar`) 
 		values 
-		($i, $j, '$nivel', geomfromtext('$polygon'), '$cpu', '1')";
+		($i, $j, '$nivel', geomfromtext('$polygon'), '$cpu', '1')
+		ON DUPLICATE KEY UPDATE aDibujar = '1'";
 		mysql_query($query);
 	}
 	/*****************Geometry miscelaneous functions*************************/
