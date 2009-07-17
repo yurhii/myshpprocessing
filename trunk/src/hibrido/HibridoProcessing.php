@@ -84,7 +84,9 @@ class HibridoProcessing extends MapWareCore{
 			while($this->layer = mysql_fetch_array($layers)){
 				$catalgos = explode(",", $this->layer["catalogos"]);
 				$this->layer["pathCampoTipo"] = $catalgos[0]."_id";
-				$this->drawLayer();
+				if($this->nivel >= $this->layer["drawFromNivel"] && $this->nivel <= $this->layer["drawToNivel"]){
+					$this->drawLayer();
+				}
 			}
 			//dibujar labels	
 			$this->drawLabels();
@@ -109,6 +111,7 @@ class HibridoProcessing extends MapWareCore{
 			SET `hibrido` = '$file', `hibrido_exists` = '1'
 			WHERE `i` = '".$this->image["i"]."' and `j` = '".$this->image["j"]."' 
 			and `nivel` = '".$this->image["nivel"]."'";
+			
 			mysql_query($query) or die($query);
 		}
 	}
@@ -162,7 +165,8 @@ class HibridoProcessing extends MapWareCore{
 		//si hay paths a dibujar a este nivel continuamos
 		if(mysql_num_rows($path_tipos) != 0){
 			//sacar los paths a dibujar con todos los atributos necesarios
-			$query = "SELECT `".$this->layer["table_name"]."`.*, `colores`.`color`, `thicks`.`thick`, `thicks`.`thickBkg` 
+			$query = "SELECT `".$this->layer["table_name"]."`.text_puntos, 
+			`colores`.`color`, `thicks`.`thick`, `thicks`.`thickBkg`, `".$this->layer["table_name"]."_memory$table_memory_index`.`drawOrder`
 			FROM  `".$this->layer["table_name"]."_memory$table_memory_index` 
 			JOIN ".$this->layer["table_name"]." on  `".$this->layer["table_name"]."_memory$table_memory_index`.clave = ".$this->layer["table_name"].".clave
 			JOIN `paths_tipos` ON `paths_tipos`.`tipo_id` =  `".$this->layer["table_name"]."_memory$table_memory_index`.`".$this->layer["pathCampoTipo"]."`
@@ -189,8 +193,8 @@ class HibridoProcessing extends MapWareCore{
 				array_push($where_clause,  "(".$subquery.")");
 			}
 			$query .= implode(" OR ", $where_clause);
-			$query .= ")
-			order by `".$this->layer["table_name"]."_memory$table_memory_index`.drawOrder desc";
+			$query .= ")";
+			//order by `".$this->layer["table_name"]."_memory$table_memory_index`.drawOrder desc"; 
 			$paths = mysql_query($query) or die($query);
 			//dibujar bkg
 			if($withBkg){
@@ -206,8 +210,19 @@ class HibridoProcessing extends MapWareCore{
 		if(mysql_num_rows($paths) != 0){
 			mysql_data_seek($paths, 0);
 		}
-		//para cada path a dibujar
+		
+		$storedPaths = array();
+		$index = 0;
 		while($path = mysql_fetch_array($paths)){
+			$storedPaths[$path["drawOrder"]."_".$index] = $path;
+			$index++;
+		}
+		ksort($storedPaths);
+		
+		$storedPaths = array_reverse($storedPaths);
+		
+		//para cada path a dibujar
+		foreach ($storedPaths as $key => $path) {
 			$puntos = explode(",", $path["text_puntos"]);
 			//set color
 			$color = $path["color"];
