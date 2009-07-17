@@ -54,7 +54,7 @@ class InsertShapeFile extends MapWareCore{
 	//clases posibles polygon, path, point
 	function insertShpData(){
 		$first_record = false;
-		//for($indice = 0; $indice< count($this->shp->records);$indice++){
+		$count_index = 0;
 		while($shp_record = $this->shp->fetchOneRecord()){
 			$shp_data = $shp_record->shp_data;
 			$dbf_data = $shp_record->dbf_data;
@@ -101,6 +101,11 @@ class InsertShapeFile extends MapWareCore{
 					$this->actualizarEscalaPorNivel($nivel);
 					$this->crearGuardarImagenes($upperLeft, $lowerRight, $nivel, $inserted_clave, $this->table_name, $padding);
 				}
+			}
+			$count_index++;
+			//log de avance
+			if($count_index % 500 == 0){
+				error_log("porcentaje de avance insertando shp ".round(100 * $count_index/count($this->shp ->records))."%");
 			}
 		}
 	}
