@@ -265,7 +265,7 @@ class CreateLabels extends MapWareCore {
 			if($this->override){
 				$query .= "ON DUPLICATE KEY UPDATE clean = '1'";
 			}
-			mysql_query($query) or die($query);
+			mysql_query($query);
 			//aumentamos el autoindex
 		}
 		//crear y guardar la referencia a las imagenes
