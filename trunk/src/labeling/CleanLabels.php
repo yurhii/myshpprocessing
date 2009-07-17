@@ -58,9 +58,9 @@ class CleanLabels extends MapWareCore {
 		) ENGINE=MEMORY  DEFAULT CHARSET=utf8";
 		mysql_query($query) or die($query);
 		$query = "insert into `labels_memory_$this->nivel` 
-		select null as order_id, id, clave, xmax, xmin, ymax, ymin, text, nivel, table_name, clean
+		select null as order_id, id, clave, xmax, xmin, ymax, ymin, text, nivel, table_name, '1' as clean
 		from labels
-		where nivel = $this->nivel and clean = '1'
+		where nivel = $this->nivel and clean in ('1', '2')
 		order by labelValue asc";
 		mysql_query($query) or die($query);
 	}
@@ -115,12 +115,12 @@ class CleanLabels extends MapWareCore {
 		$query = "update labels
 		join `labels_memory_$this->nivel` on `labels_memory_$this->nivel`.id = labels.id
 		set labels.clean = `labels_memory_$this->nivel`.clean
-		where `labels_memory_$this->nivel`.clean = '2'";
+		where `labels`.nivel = '$this->nivel'";
 		mysql_query($query) or die($query);
 		//borrar la base en memoria
 		$query = "DROP TABLE `labels_memory_$this->nivel`";
 		mysql_query($query);
-		//actualizar en base de datos los cleanLabels
+		//regresamos false para que continue el proceso
 		return false;
 	}
 	function guardarLabel($clave, $cleanStatus){

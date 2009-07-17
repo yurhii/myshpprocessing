@@ -70,8 +70,12 @@ class CreateLabels extends MapWareCore {
 		JOIN  `paths_tipos__length__restrictions` AS l_r ON l_r.path_tipo_id = paths_tipos.id
 		AND l_r.nivel =  '".$this->nivel."'
 		WHERE nombre !=  ''
-		AND length(mysql_puntos) > longitud_minima";
-		//AND labeled < '".$this->nivel."'";
+		AND length(mysql_puntos) > longitud_minima ";
+		//para niveles en donde no hay tanta importancia solo usamos palabras cortas
+		//para mantener la estetica
+		if($this->nivel < 10){
+			$query .= " AND CHAR_LENGTH(nombre) < 10";
+		}
 		$paths = mysql_query($query) or die($query);
 		while($row = mysql_fetch_array($paths)){
 			//poligono en mayusculas y minusculas

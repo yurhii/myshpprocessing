@@ -33,7 +33,14 @@ if(isset($_REQUEST["nivel"]) && isset($_REQUEST["override"])){
 	}
 }else{
 	?>
-	<a href="createLabels.php?nivel=1&override=1">Start with Override</a><br>
+	<script type="text/javascript">
+	function startWithOverride(){
+		if(confirm("Esta seguro que desea empezar el labeling desde cero")){
+			window.location = "createLabels.php?nivel=1&override=1";
+		}
+	}
+	</script>
+	<a href="#" onClick = "startWithOverride()" >Start with Override</a><br>
 	<a href="createLabels.php?nivel=1&override=0">Start without Override</a>
 	<?
 }
