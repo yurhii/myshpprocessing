@@ -16,9 +16,13 @@ class CreateLabels extends MapWareCore {
 	var $pathCampoTipo;
 	//variable que nos dice cual es el current index a insertar en la base de datos
 	var $nextAutoIndex;
-	function CreateLabels($tableName, $nivelNumber = NULL){
+	//variable que nos dice si a todos los labels si ya estan creados se les actualiza
+	//el valor de clean a 1 o no
+	var $override;
+	function CreateLabels($tableName, $nivelNumber = NULL, $override = true){
 		$this->openMySQLConn();
 		$this->nivel = $nivelNumber;
+		$this->override = $override;
 		if(!is_numeric($this->nivel)){
 			die("no hay nivel especificado");
 		}
@@ -98,12 +102,6 @@ class CreateLabels extends MapWareCore {
 			$box = $this->getPathLabelBox($segmento_mayor["p0"][0], $segmento_mayor["p0"][1], $segmento_mayor["p1"][0], $segmento_mayor["p1"][1], $nombre);
 			$labelValue = $this->labelOrderValue*10000000 + $row["drawOrder"]*100000 - $longitud - $longitud_mayor;
 			$insertado = $this->insertBox($box, $row, $labelValue, $segmento_mayor["k"], $segmento_mayor["n"]);
-			//precisar que el label de esta calle ya fue guardado
-			//imperativo para que el proceso no se trave!!!!!!!!!!!!!!
-			/*$query = "update `".$this->table_name."` 
-			set labeled = '".$this->nivel."' 
-			where clave = '".$row["clave"]."'";
-			mysql_query($query) or die($query);*/
 		}
 	}
 	function getPathLabelBox($xx1, $yy1, $xx2, $yy2, $text){
@@ -215,12 +213,6 @@ class CreateLabels extends MapWareCore {
 			$labelValue = $this->labelOrderValue*10000000 - $row["size"];
 			//insertar ambas cajas
 			$poligon_text1 = $this->insertBox($box1, $row, $labelValue, $box2);
-			//precisar que el label de esta calle ya fue guardado
-			//imperativo para que el proceso no se trave!!!!!!!!!!!!!!
-			/*$query = "update `".$this->table_name."` 
-			set labeled = '".$this->nivel."' 
-			where clave = '".$row["clave"]."'";
-			mysql_query($query) or die($query);*/
 		}
 	}
 	function insertBox($box1, $row, $labelValue, $box2 = array(), $parte = 0, $indice = 0){
@@ -258,7 +250,7 @@ class CreateLabels extends MapWareCore {
 		'".$this->nivel."', '".$this->table_name."', '".$row["clave"]."', '".$parte."_".$indice."', '$labelValue', $polygon  )";
 		//vemos si se llevo a cabo un insert o un update
 		$was_insert = mysql_query($query);
-		if(!$was_insert){
+		if(!$was_insert && $this->override){
 			$query = "update labels set clean = '1' where clave = '".$this->nextAutoIndex."'";
 			mysql_query($query) or die($query);
 		}
@@ -269,8 +261,10 @@ class CreateLabels extends MapWareCore {
 			`nivel`, `table_name`, `objeto_clave`, `identifier`, `labelValue`, `mysql_puntos`) 
 			VALUES 
 			( ".$this->nextAutoIndex.", '".$box2["x"]."', '".$box2["y"]."', $p2xmax, $p2xmin, $p2ymax, $p2ymin, '".$box2["angle"]."', '".$box2["text"]."', '".$this->getFontsize($this->nivel)."', 
-			'".$this->nivel."', '".$this->table_name."', '".$row["clave"]."', '".$parte."_".$indice."', '$labelValue', $polygon  )
-			ON DUPLICATE KEY UPDATE clean = '1'";
+			'".$this->nivel."', '".$this->table_name."', '".$row["clave"]."', '".$parte."_".$indice."', '$labelValue', $polygon  ) ";
+			if($this->override){
+				$query .= "ON DUPLICATE KEY UPDATE clean = '1'";
+			}
 			mysql_query($query) or die($query);
 			//aumentamos el autoindex
 		}

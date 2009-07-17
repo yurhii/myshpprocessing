@@ -86,19 +86,21 @@ class InsertShapeFile extends MapWareCore{
 									$this->convertYFromShpToMapWare($shp_data["y"]));
 			}
 			for($nivel = $this->nivelInicialDeReferencia; $nivel <= $this->nivelFinalDeReferencia; $nivel++){
-				$upperLeft = $this->getCuadroFromPointAtNivel($upperLeftPoint[0], $upperLeftPoint[1], $nivel);
-				$lowerRight = $this->getCuadroFromPointAtNivel($lowerRightPoint[0], $lowerRightPoint[1], $nivel);
-				if($nivel > 9 && $this->table_name == "areas_urbanas"){
-					$padding = 8;
-				}elseif($this->table_name == "areas_urbanas"){
-					$padding = 3;
-				}elseif($this->table_name == "calles"){
-					$padding = 1;
-				}else{
-					$padding = 0;
+				if($nivel != 0){
+					$upperLeft = $this->getCuadroFromPointAtNivel($upperLeftPoint[0], $upperLeftPoint[1], $nivel);
+					$lowerRight = $this->getCuadroFromPointAtNivel($lowerRightPoint[0], $lowerRightPoint[1], $nivel);
+					if($nivel > 9 && $this->table_name == "areas_urbanas"){
+						$padding = 8;
+					}elseif($this->table_name == "areas_urbanas"){
+						$padding = 3;
+					}elseif($this->table_name == "calles"){
+						$padding = 1;
+					}else{
+						$padding = 0;
+					}
+					$this->actualizarEscalaPorNivel($nivel);
+					$this->crearGuardarImagenes($upperLeft, $lowerRight, $nivel, $inserted_clave, $this->table_name, $padding);
 				}
-				$this->actualizarEscalaPorNivel($nivel);
-				$this->crearGuardarImagenes($upperLeft, $lowerRight, $nivel, $inserted_clave, $this->table_name, $padding);
 			}
 		}
 	}

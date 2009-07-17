@@ -20,55 +20,32 @@ $viewExists = mysql_num_rows(mysql_query($query));
 $query = "select * from `".$table_name."_memory1` limit 10";
 $cuenta = mysql_query($query);
 if($viewExists == 0 || $cuenta == false || mysql_num_rows($cuenta) == 0){
-	$createQuery = "CREATE TABLE `".$table_name."_memory0` (
-	  `drawOrder` int(11) NOT NULL,
-	  `tipo_id` int(11) NOT NULL,
-	  `longitud` double NOT NULL,
-	  `grupo` int(11) NOT NULL,
-	  `clave` varchar(50) NOT NULL,
-	  PRIMARY KEY  (`clave`),
-	  KEY `drawOrder` (`drawOrder`),
-	  KEY `tipo_id` (`tipo_id`),
-	  KEY `longitud` (`longitud`),
-	  KEY `grupo` (`grupo`),
-	  KEY `clave` (`clave`)
-	) ENGINE=MEMORY DEFAULT CHARSET=utf8;";
-	mysql_query($createQuery);
-	
-	$query = "insert into `".$table_name."_memory0`
-	select `paths_tipos`.`drawOrder`, 
-	`".$table_name."`.`tipo_id`, 
-	longitud, grupo, clave
-	from `".$table_name."`
-	JOIN `paths_tipos` on `paths_tipos`.`tipo_id` = `".$table_name."`.`tipo_id`
-	where drawOrder > 0
-	ORDER BY `paths_tipos`.`drawOrder` desc";
-	mysql_query($query) or die($query);
-	
-	//memory table 2
-	$createQuery = "CREATE TABLE `".$table_name."_memory1` (
-	 `drawOrder` int(11) NOT NULL,
-	  `tipo_id` int(11) NOT NULL,
-	  `longitud` double NOT NULL,
-	  `grupo` int(11) NOT NULL,
-	  `clave` varchar(50) NOT NULL,
-	  PRIMARY KEY  (`clave`),
-	  KEY `tipo_id` (`tipo_id`),
-	  KEY `longitud` (`longitud`),
-	  KEY `grupo` (`grupo`),
-	  KEY `clave` (`clave`)
-	) ENGINE=MEMORY DEFAULT CHARSET=utf8;";
-	mysql_query($createQuery);
-	
-	$query = "insert into `".$table_name."_memory1`
-	select `paths_tipos`.`drawOrder`, 
-	`".$table_name."`.`tipo_id`, 
-	longitud, grupo, clave
-	from `".$table_name."`
-	JOIN `paths_tipos` on `paths_tipos`.`tipo_id` = `".$table_name."`.`tipo_id`
-	where drawOrder > 0
-	ORDER BY `paths_tipos`.`drawOrder` desc";
-	mysql_query($query) or die($query);
+	for($h= 0; $h < 2; $h++){
+		$createQuery = "CREATE TABLE `".$table_name."_memory".$h."` (
+		  `drawOrder` int(11) NOT NULL,
+		  `tipo_id` int(11) NOT NULL,
+		  `longitud` double NOT NULL,
+		  `grupo` int(11) NOT NULL,
+		  `clave` varchar(50) NOT NULL,
+		  PRIMARY KEY  (`clave`),
+		  KEY `drawOrder` (`drawOrder`),
+		  KEY `tipo_id` (`tipo_id`),
+		  KEY `longitud` (`longitud`),
+		  KEY `grupo` (`grupo`),
+		  KEY `clave` (`clave`)
+		) ENGINE=MEMORY DEFAULT CHARSET=utf8;";
+		mysql_query($createQuery);
+		
+		$query = "insert into `".$table_name."_memory".$h."`
+		select `paths_tipos`.`drawOrder`, 
+		`".$table_name."`.`tipo_id`, 
+		longitud, grupo, clave
+		from `".$table_name."`
+		JOIN `paths_tipos` on `paths_tipos`.`tipo_id` = `".$table_name."`.`tipo_id`
+		where drawOrder > 0
+		ORDER BY `paths_tipos`.`drawOrder` desc";
+		mysql_query($query) or die($query);
+	}
 }
 ?>
 <script type="text/javascript">

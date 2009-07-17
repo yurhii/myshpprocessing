@@ -6,7 +6,7 @@ if(isset($_REQUEST["start"])){
 	$cpu = isset($_REQUEST["cpu"]) ? $_REQUEST["cpu"] : 1;
 	$tipoProcesamiento = isset($_REQUEST["tipo"]) ? $_REQUEST["tipo"] : 0;
 	$hibrido = new HibridoProcessing($nivel, $cpu, $tipoProcesamiento);
-	if($hibrido->startProcessingAllNoMatchToOurSateliteAssets()){
+	if($hibrido->startProcessingToMatchOurSateliteAssets()){
 		?>
 		<script type="text/javascript">
 			window.location = "processHibrido.php?start=1&nivel=<? echo $nivel; ?>&cpu=<? echo $cpu; ?>&tipo=<? echo $tipoProcesamiento; ?>";
