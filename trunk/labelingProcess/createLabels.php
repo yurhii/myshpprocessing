@@ -33,8 +33,8 @@ if(isset($_REQUEST["nivel"]) && isset($_REQUEST["override"])){
 	}
 }else{
 	?>
-	<a href="createLabels?nivel=1&override=1">Start with Override</a><br>
-	<a href="createLabels?nivel=1&override=0">Start without Override</a>
+	<a href="createLabels.php?nivel=1&override=1">Start with Override</a><br>
+	<a href="createLabels.php?nivel=1&override=0">Start without Override</a>
 	<?
 }
 ?>
