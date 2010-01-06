@@ -50,6 +50,7 @@ if(isset($_REQUEST["setPathTipo"])){
 	from ".$table_name."__".$campo_de_tipo."__catalogo as catalogo
 	join paths_tipos on paths_tipos.tipo_id = catalogo.id
 	left join paths_tipos__colores as colores on colores.path_tipo_id = paths_tipos.id
+	where paths_tipos.table_name = 'calles'
 	order by paths_tipos.drawOrder asc";
 	$catalogo = mysql_query($query) or die($query);
 	while($tipo = mysql_fetch_array($catalogo)){
@@ -116,6 +117,7 @@ $query = "select catalogo.*, colores.color, colores.descripcion, paths_tipos.id 
 from ".$table_name."__".$campo_de_tipo."__catalogo as catalogo
 join paths_tipos on paths_tipos.tipo_id = catalogo.id
 left join paths_tipos__colores as colores on colores.path_tipo_id = paths_tipos.id
+where paths_tipos.table_name = 'calles'
 order by paths_tipos.drawOrder asc";
 $catalogo = mysql_query($query) or die($query);
 while($tipo = mysql_fetch_array($catalogo)){

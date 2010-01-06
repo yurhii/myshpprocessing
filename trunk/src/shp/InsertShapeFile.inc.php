@@ -105,7 +105,7 @@ class InsertShapeFile extends MapWareCore{
 			$count_index++;
 			//log de avance
 			if($count_index % 500 == 0){
-				error_log("porcentaje de avance insertando shp ".round(100 * $count_index/count($this->shp ->records))."%");
+				error_log($count_index." records insertados");
 			}
 		}
 	}
