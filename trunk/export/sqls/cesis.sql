@@ -1,3 +1,4 @@
+drop table cesis;
 create table[cesis] ([cesi] varchar(255) not null , [estado] varchar(255) not null , [municipio] varchar(255) not null , [localidad] varchar(255) not null , [cv_edo] varchar(255) not null , [cv_mun] varchar(255) not null , [cv_loc] varchar(255) not null , [clave] varchar(50) not null  primary key , [calle] varchar(255) not null , [numero] int not null , [detalle] varchar(255) not null , [colonia] varchar(255) not null , [cp] int not null , [lada] int not null , [telefono_1] varchar(255) not null , [telefono_2] varchar(255) not null , [telefono_3] varchar(255) not null , [lat] float not null , [lon] float not null , [xCoor] int not null , [yCoor] int not null  );
 CREATE INDEX cesi ON [cesis] (cesi);
 		CREATE INDEX estado ON [cesis] (estado);
