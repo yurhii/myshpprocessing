@@ -36,6 +36,8 @@ class export extends MapWareCore{
 	}
 	function generateQuery(&$db_type){
 		$db_type = $this->db_type;
+		$deleteQuery = "drop table $this->table_name;";
+		array_push($this->sql_file, $deleteQuery);
 		//query para creacion de tabla
 		$queryTable = "create table";
 		if($this->db_type == "MySQL"){
