@@ -378,6 +378,12 @@ class InsertShapeFile extends MapWareCore{
 		//puntos como texto
 		array_push($campos, "`text_puntos`");
 		array_push($valores, "'".$mysql_text."'");
+		//los puntos explicitamente
+		array_push($campos, "`xCoor`");
+		array_push($valores, "'".$x."'");
+		//
+		array_push($campos, "`yCoor`");
+		array_push($valores, "'".$y."'");
 		//query de insertado
 		$query = "insert into ".$this->table_name."
 		(".implode(", ", $campos).")
@@ -476,6 +482,8 @@ class InsertShapeFile extends MapWareCore{
 					array_push($campos, "`mysql_puntos` point not null");
 					array_push($indices, "SPATIAL INDEX(`mysql_puntos`)");
 					array_push($campos, "`text_puntos` text not null");
+					array_push($campos, "`xCoor` int not null");
+					array_push($campos, "`yCoor` int not null");
 					break;
 			}
 			//añadir campos al query
