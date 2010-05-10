@@ -192,15 +192,21 @@ WHERE   `imagenes`.`nivel` = '$this->nivel'
 			//set thick
 			$thick = $bkg ? $path["thickBkg"] : $path["thick"];
 			//si es bkg el color es gris	
-			$color = $bkg ? 'A5A5A500' : $color;
-			for($k = 1; $k < count($puntos); $k++){
-				$xy = explode(" ", $puntos[$k]);
-				$xy[0] -= $this->xmin + ($this->square[0])*$this->squareSize*$this->escala;
-				$xy[1] -= $this->ymin + ($this->square[1])*$this->squareSize*$this->escala;
-				$xypre  = explode(" ", $puntos[$k-1]);
-				$xypre[0] -= $this->xmin + ($this->square[0])*$this->squareSize*$this->escala;
-				$xypre[1] -= $this->ymin + ($this->square[1])*$this->squareSize*$this->escala;
-				$this->imageCanvas->drawPolygonLine($this->resize * $xypre[0]/$this->escala, $this->resize * $xypre[1]/$this->escala, $this->resize * $xy[0]/$this->escala, $this->resize * $xy[1]/$this->escala, $color, $this->resize * $thick);
+			if($path["tipo_id"] != 1 || $this->nivel > 9 || $bkg){
+				$color = $bkg ? 'A5A5A500' : $color;
+				//color para el bkg de nivel 8 y 9 ya que no se dibuja sobre solo bkg
+				if($bkg && ($this->nivel == 8 || $this->nivel == 9)){
+					$color = "CCCCCC00";	
+				}
+				for($k = 1; $k < count($puntos); $k++){
+					$xy = explode(" ", $puntos[$k]);
+					$xy[0] -= $this->xmin + ($this->square[0])*$this->squareSize*$this->escala;
+					$xy[1] -= $this->ymin + ($this->square[1])*$this->squareSize*$this->escala;
+					$xypre  = explode(" ", $puntos[$k-1]);
+					$xypre[0] -= $this->xmin + ($this->square[0])*$this->squareSize*$this->escala;
+					$xypre[1] -= $this->ymin + ($this->square[1])*$this->squareSize*$this->escala;
+					$this->imageCanvas->drawPolygonLine($this->resize * $xypre[0]/$this->escala, $this->resize * $xypre[1]/$this->escala, $this->resize * $xy[0]/$this->escala, $this->resize * $xy[1]/$this->escala, $color, $this->resize * $thick);
+				}
 			}
 		}
 	}

@@ -17,6 +17,8 @@ class image {
 	var $fonts = array();
 
 	var $error = array();
+	
+	var $resize = 4;
 
 	function image($width, $height, $bkgColour, $transparent = false) {
 		$this->bkgColour = (isset($bkgColour))? $bkgColour : 'ffffff00';
@@ -403,10 +405,10 @@ class image {
 		}else{
 			$glow = imagecolorallocatealpha($image, 255, 255, 255, 10);
 		}
-		imagettftext($image, $fontsize, $angle, $x+3, $y, $glow, $font, $text);
-		imagettftext($image, $fontsize, $angle, $x-3, $y, $glow, $font, $text);
-		imagettftext($image, $fontsize, $angle, $x, $y+3, $glow, $font, $text);
-		imagettftext($image, $fontsize, $angle, $x, $y-3, $glow, $font, $text);
+		imagettftext($image, $fontsize, $angle, $x+2 * $this->resize, $y, $glow, $font, $text);
+		imagettftext($image, $fontsize, $angle, $x-2 * $this->resize, $y, $glow, $font, $text);
+		imagettftext($image, $fontsize, $angle, $x, $y+2 * $this->resize, $glow, $font, $text);
+		imagettftext($image, $fontsize, $angle, $x, $y-2 * $this->resize, $glow, $font, $text);
 		//texto
 		imagettftext($image, $fontsize, $angle, $x, $y, $colour, $font, $text);
 	}
