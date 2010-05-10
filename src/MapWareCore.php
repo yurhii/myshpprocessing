@@ -41,7 +41,7 @@ class MapWareCore{
 	var $width;
 	var $height;
 	//esta variable nos indica de que tamaño generamos las imagenes para aumentar la resolucion, el doble es bueno
-	var $resize = 2;
+	var $resize = 4;
 	//dimensiones de una imagen en mapWare
 	var $squareSize = 200;
 	//estos datos se actualizan con la funcion actualizarDatosPorNivel
