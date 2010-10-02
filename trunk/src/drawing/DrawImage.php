@@ -32,7 +32,7 @@ class DrawImage extends MapWareCore{
 		$query = "SELECT `imagenes`.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
 		FROM `imagenes`
 WHERE   `imagenes`.`nivel` = '$this->nivel' 
-		AND `aDibujar` = '1' 
+		AND `aDibujar` = '1'
 		AND `cpu` = '".$this->cpu."'
 		LIMIT ".$this->imagenes_por_request;
 		//solo DF ::: JOIN areas_urbanas_por_imagen ON areas_urbanas_por_imagen.i = imagenes.i
@@ -78,7 +78,7 @@ WHERE   `imagenes`.`nivel` = '$this->nivel'
 			$image200px = imagecreatetruecolor($this->squareSize, $this->squareSize);
 			imagecopyresampled($image200px, $this->imageCanvas->image, 0, 0, 0, 0, $this->squareSize, $this->squareSize, $this->squareSize*$this->resize, $this->squareSize*$this->resize);
 			//set compression level = 3
-			imagepng($image200px, $archivo, 3);
+			imagepng($image200px, $archivo, 3, PNG_NO_FILTER);
 			chmod($archivo, 0777);
 			//tomar la informacion del archivo e ingresarla a la base de datos
 			$file = mysql_real_escape_string(file_get_contents($archivo));
@@ -192,20 +192,22 @@ WHERE   `imagenes`.`nivel` = '$this->nivel'
 			//set thick
 			$thick = $bkg ? $path["thickBkg"] : $path["thick"];
 			//si es bkg el color es gris	
-			if($path["tipo_id"] != 1 || $this->nivel > 9 || $bkg){
-				$color = $bkg ? 'A5A5A500' : $color;
-				//color para el bkg de nivel 8 y 9 ya que no se dibuja sobre solo bkg
-				if($bkg && ($this->nivel == 8 || $this->nivel == 9)){
-					$color = "CCCCCC00";	
-				}
-				for($k = 1; $k < count($puntos); $k++){
-					$xy = explode(" ", $puntos[$k]);
-					$xy[0] -= $this->xmin + ($this->square[0])*$this->squareSize*$this->escala;
-					$xy[1] -= $this->ymin + ($this->square[1])*$this->squareSize*$this->escala;
-					$xypre  = explode(" ", $puntos[$k-1]);
-					$xypre[0] -= $this->xmin + ($this->square[0])*$this->squareSize*$this->escala;
-					$xypre[1] -= $this->ymin + ($this->square[1])*$this->squareSize*$this->escala;
-					$this->imageCanvas->drawPolygonLine($this->resize * $xypre[0]/$this->escala, $this->resize * $xypre[1]/$this->escala, $this->resize * $xy[0]/$this->escala, $this->resize * $xy[1]/$this->escala, $color, $this->resize * $thick);
+			if($thick > 0){
+				if($path["tipo_id"] != 1 || $this->nivel > 9 || $bkg){
+					$color = $bkg ? 'A5A5A500' : $color;
+					//color para el bkg de nivel 8 y 9 ya que no se dibuja sobre solo bkg
+					if($bkg && ($this->nivel == 8 || $this->nivel == 9 || $this->nivel == 7)){
+						$color = "CCCCCC00";	
+					}
+					for($k = 1; $k < count($puntos); $k++){
+						$xy = explode(" ", $puntos[$k]);
+						$xy[0] -= $this->xmin + ($this->square[0])*$this->squareSize*$this->escala;
+						$xy[1] -= $this->ymin + ($this->square[1])*$this->squareSize*$this->escala;
+						$xypre  = explode(" ", $puntos[$k-1]);
+						$xypre[0] -= $this->xmin + ($this->square[0])*$this->squareSize*$this->escala;
+						$xypre[1] -= $this->ymin + ($this->square[1])*$this->squareSize*$this->escala;
+						$this->imageCanvas->drawPolygonLine($this->resize * $xypre[0]/$this->escala, $this->resize * $xypre[1]/$this->escala, $this->resize * $xy[0]/$this->escala, $this->resize * $xy[1]/$this->escala, $color, $this->resize * $thick);
+					}
 				}
 			}
 		}
