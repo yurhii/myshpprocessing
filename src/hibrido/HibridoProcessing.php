@@ -76,7 +76,6 @@ class HibridoProcessing extends MapWareCore{
 			$this->imageCanvas->setVars($this->escala, $this->xmin, $this->ymin);
 			//
 			$query = "SELECT * FROM tables
-			join tables__attributes on tables__attributes.table_name = tables.table_name
 			WHERE hibridDrawLayerOrder != 0
 			ORDER BY `hibridDrawLayerOrder` asc";
 			$layers = mysql_query($query) or die($query);
@@ -131,9 +130,8 @@ class HibridoProcessing extends MapWareCore{
 		}
 	}
 	function drawLabels(){
-		$query = "SELECT labels.x, labels.y, labels.size, labels.text, labels.angle, tables__attributes.colorLabel 
+		$query = "SELECT labels.x, labels.y, labels.size, labels.text, labels.angle, tables.colorLabel 
 		FROM labels 
-		JOIN tables__attributes on labels.table_name = tables__attributes.table_name
 		join labels_por_imagen on labels.clave = labels_por_imagen.clave
 		WHERE clean = '2'
 		AND labels_por_imagen.i = '".$this->image["i"]."' AND labels_por_imagen.j = '".$this->image["j"]."'

@@ -39,7 +39,6 @@ class CreateLabels extends MapWareCore {
 		$this->nextAutoIndex = $res["AUTO_INCREMENT"];
 		//sacar la clase del shp que corresponde a esta tabla
 		$query = "select * from `tables` 
-		join tables__attributes on tables__attributes.table_name = tables.table_name
 		where tables.`table_name` = '".$this->table_name."'";
 		$res = mysql_fetch_array(mysql_query($query)) or die($query);
 		$this->class = $res["class"];

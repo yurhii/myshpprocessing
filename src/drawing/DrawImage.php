@@ -58,7 +58,6 @@ WHERE   `imagenes`.`nivel` = '$this->nivel'
 			$this->imageCanvas->setVars($this->escala, $this->xmin, $this->ymin);
 			//sacar las capas que se van a dibuar de la tabla de shp_tablas
 			$query = "SELECT * FROM tables
-			join tables__attributes on tables__attributes.table_name = tables.table_name
 			WHERE drawLayerOrder != 0
 			ORDER BY `drawLayerOrder` asc";
 			$layers = mysql_query($query) or die($query);
@@ -106,9 +105,8 @@ WHERE   `imagenes`.`nivel` = '$this->nivel'
 		}
 	}
 	function drawLabels(){
-		$query = "SELECT labels.x, labels.y, labels.size, labels.text, labels.angle, tables__attributes.colorLabel 
+		$query = "SELECT labels.x, labels.y, labels.size, labels.text, labels.angle, tables.colorLabel 
 		FROM labels 
-		JOIN tables__attributes on labels.table_name = tables__attributes.table_name
 		join labels_por_imagen on labels.clave = labels_por_imagen.clave
 		WHERE clean = '2'
 		AND labels_por_imagen.i = '".$this->image["i"]."' AND labels_por_imagen.j = '".$this->image["j"]."'
