@@ -43,7 +43,7 @@ class CreateLabels extends MapWareCore {
 		$res = mysql_fetch_array(mysql_query($query)) or die($query);
 		$this->class = $res["class"];
 		$this->labelOrderValue = $res["labelOrder"];
-		$catalogos = explode(",", $res["catalogos"]);
+		$catalogos = explode(",", $res["campoCatalogo"]);
 		$this->pathCampoTipo = $catalogos[0]."_id";
 		//definir si los labels van sobre el centro o desfasados para que el centro quede libre (caso areas_urbanas)
 		$this->hayDesface = ($res["drawPointInCenter"] != '0');
