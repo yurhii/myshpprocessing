@@ -672,59 +672,27 @@ class MapWareCore{
 		$query = "CREATE TABLE `tables` (
 		  `table_name` varchar(200) NOT NULL,
 		  `class` enum('RecordPolyLine','RecordPolygon','RecordPoint') NOT NULL,
+		  `campoCatalogo` text NOT NULL,
 		  `drawLayerOrder` int(11) NOT NULL COMMENT '0 is for no draw',
 		  `hibridDrawLayerOrder` int(11) NOT NULL COMMENT '0 is for no drawing',
-		  `labelOrder` int(11) NOT NULL COMMENT '0 is for no labeling',
-		  `fecha` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-		  PRIMARY KEY  (`table_name`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
-		if(mysql_query($query)){
-			$query = "INSERT INTO `tables` VALUES ('areas_urbanas', 'RecordPolygon', 3, 0, 4, '2008-11-27 15:08:01');
-			INSERT INTO `tables` VALUES ('estados', 'RecordPolygon', 1, 1, 5, '2008-11-27 15:08:01');
-			INSERT INTO `tables` VALUES ('municipios', 'RecordPolygon', 2, 2, 6, '2008-11-27 15:08:01');
-			INSERT INTO `tables` VALUES ('parques', 'RecordPolygon', 4, 0, 2, '2008-11-27 15:08:01');
-			INSERT INTO `tables` VALUES ('industrias', 'RecordPolygon', 5, 0, 0, '2008-11-27 14:57:35');
-			INSERT INTO `tables` VALUES ('calles', '', 6, 3, 3, '2008-11-27 15:08:01');
-			INSERT INTO `tables` VALUES ('colonias', 'RecordPolygon', 0, 0, 1, '2008-11-27 15:07:36');
-			INSERT INTO `tables` VALUES ('puntos_de_interes', 'RecordPoint', 0, 0, 0, '2008-11-27 15:30:55');";
-			$split = explode(";", $query);
-			for($i=0; $i<count($split); $i++){
-				mysql_query($split[$i]);
-			}
-		}
-		
-		
-		$query = "CREATE TABLE `tables__attributes` (
-		  `table_name` varchar(200) NOT NULL,
-		  `catalogos` text NOT NULL,
-		  `crearImagenesFromNivel` int(11) NOT NULL,
-		  `crearImagenesToNivel` int(11) NOT NULL,
 		  `drawFromNivel` int(11) NOT NULL,
 		  `drawToNivel` int(11) NOT NULL,
-		  `labelFromNivel` int(11) NOT NULL,
-		  `labelToNivel` int(11) NOT NULL,
-		  `colorLabel` varchar(8) NOT NULL,
 		  `colorFill` varchar(8) NOT NULL,
 		  `colorBorder` varchar(8) NOT NULL,
 		  `drawPointInCenter` enum('0','1') NOT NULL,
 		  `drawPointInCenterFromNivel` int(11) NOT NULL,
 		  `drawPointInCenterToNivel` int(11) NOT NULL,
-		  PRIMARY KEY  (`table_name`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='El primer valor del catalogo es el campo de tipo';";
-		if(mysql_query($query)){
-			$query = "INSERT INTO `tables__attributes` VALUES ('estados', '', 1, 9, 1, 13, 1, 9, '98969700', 'F2EFEA00', 'B3AFAF00', '0', 0, 0);
-			INSERT INTO `tables__attributes` VALUES ('areas_urbanas', 'tipo', 1, 13, 1, 13, 1, 9, '33333300', 'EDEAD200', 'DEDEDE00', '1', 1, 8);
-			INSERT INTO `tables__attributes` VALUES ('industrias', 'tipo', 0, 0, 7, 13, 12, 13, 'FD606F00', 'FFB4B400', 'FFB4B47f', '0', 0, 0);
-			INSERT INTO `tables__attributes` VALUES ('municipios', '', 0, 0, 1, 11, 0, 0, '', 'EDEAD27f', 'DEDEDE00', '0', 0, 0);
-			INSERT INTO `tables__attributes` VALUES ('parques', 'tipo', 0, 0, 7, 13, 8, 13, '0C570200', 'B5E29D00', 'B5E29D7f', '0', 0, 0);
-			INSERT INTO `tables__attributes` VALUES ('colonias', '', 0, 0, 0, 0, 8, 11, '00339900', '', '', '0', 0, 0);
-			INSERT INTO `tables__attributes` VALUES ('calles', 'tipo', 7, 13, 7, 13, 8, 13, '10101000', '', '', '0', 0, 0);
-			INSERT INTO `tables__attributes` VALUES ('puntos_de_interes', 'tipo,tema', 0, 0, 0, 0, 0, 0, '', '', '', '0', 0, 0);";
-			$split = explode(";", $query);
-			for($i=0; $i<count($split); $i++){
-				mysql_query($split[$i]);
-			}
-		}
+		  `labelOrder` int(11) NOT NULL COMMENT '0 is for no labeling',
+		  `labelFromNivel` int(11) NOT NULL,
+		  `labelToNivel` int(11) NOT NULL,
+		  `colorLabel` varchar(8) NOT NULL,
+		  `crearImagenesFromNivel` int(11) NOT NULL,
+		  `crearImagenesToNivel` int(11) NOT NULL,
+		  `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		  PRIMARY KEY (`table_name`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		mysql_query($query);
+		
 	}
 }
 ?>
