@@ -7,7 +7,6 @@ if(isset($_REQUEST["nivel"]) && isset($_REQUEST["override"])){
 	//
 	$core = new MapWareCore();
 	$query = "select * from tables 
-	join tables__attributes on tables__attributes.table_name = tables.table_name
 	WHERE labelOrder != 0
 	order by `labelOrder` asc";
 	$res = mysql_query($query) or die($query);
