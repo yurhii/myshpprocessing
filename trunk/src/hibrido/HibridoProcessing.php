@@ -81,7 +81,7 @@ class HibridoProcessing extends MapWareCore{
 			$layers = mysql_query($query) or die($query);
 			//dibujar cada capa de informacion geografica
 			while($this->layer = mysql_fetch_array($layers)){
-				$catalgos = explode(",", $this->layer["catalogos"]);
+				$catalgos = explode(",", $this->layer["campoCatalogo"]);
 				$this->layer["pathCampoTipo"] = $catalgos[0]."_id";
 				if($this->nivel >= $this->layer["drawFromNivel"] && $this->nivel <= $this->layer["drawToNivel"]){
 					$this->drawLayer();
@@ -133,6 +133,7 @@ class HibridoProcessing extends MapWareCore{
 		$query = "SELECT labels.x, labels.y, labels.size, labels.text, labels.angle, tables.colorLabel 
 		FROM labels 
 		join labels_por_imagen on labels.clave = labels_por_imagen.clave
+		join tables on tables.table_name = labels.table_name
 		WHERE clean = '2'
 		AND labels_por_imagen.i = '".$this->image["i"]."' AND labels_por_imagen.j = '".$this->image["j"]."'
 		AND labels_por_imagen.nivel = '".$this->image["nivel"]."'";

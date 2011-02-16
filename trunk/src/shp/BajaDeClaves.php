@@ -11,7 +11,6 @@ class BajaDeClaves extends MapWareCore{
 		//sacamos la informacion de la tabla
 		$query = "select class, crearImagenesFromNivel, crearImagenesToNivel 
 		from tables
-		join tables__attributes on tables.table_name = tables__attributes.table_name
 		where tables.table_name = '$table_name'";
 		$r = mysql_query($query) or die($query);
 		if(mysql_num_rows($r) != 0){
