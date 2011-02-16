@@ -16,7 +16,6 @@ class ProcessShapeFile extends MapWareCore{
 		$this->shp = mysql_fetch_array(mysql_query($query)) or die("no hay shape files a procesar");
 		//ver si ya esta definida una tabla con este nombre con sus datos correspondientes
 		$query = "SELECT * from tables 
-		join tables__attributes on tables__attributes.table_name = tables.table_name
 		WHERE tables.`table_name`= '".$this->shp["table_name"]."'";
 		$res = mysql_query($query) or die($query);
 		$table_exists = mysql_num_rows($res);
@@ -27,7 +26,8 @@ class ProcessShapeFile extends MapWareCore{
 		//si existe contiudar creando un insert object
 		$this->insertShp = new InsertShapeFile(
 			$this->shp["id"], $this->shp["url"], 
-			$this->table["table_name"], $this->table["labelOrder"] != 0, explode(",", $this->table["catalogos"]), 
+			$this->table["table_name"], $this->table["labelOrder"] != 0, 
+			explode(",", $this->table["campoCatalogo"]), 
 			$this->table["crearImagenesFromNivel"], $this->table["crearImagenesToNivel"],
 			$this->table["drawLayerOrder"] != 0, $this->shp["campoClave"]
 		);
