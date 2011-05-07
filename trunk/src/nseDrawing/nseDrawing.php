@@ -107,7 +107,7 @@ class NSEProcessing extends MapWareCore{
 				$green = (strlen($green) == 2) ? $green : "0".$green;
 				$blue = dechex($poligono["col_b"]);
 				$blue = (strlen($blue) == 2) ? $blue : "0".$blue;
-				$color = $red.$green.$blue."64";
+				$color = $red.$green.$blue."3f";
 				$this->imageCanvas->drawFilledPolygon($puntosPolygon, "FFFFFF7f", "$color");
 			}
 		}
