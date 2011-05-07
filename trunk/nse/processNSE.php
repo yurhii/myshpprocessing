@@ -17,12 +17,6 @@ if(isset($_REQUEST["start"])){
 			window.location = "processNSE.php?start=1&nivel=<? echo $nivel + 1; ?>&cpu=<? echo $cpu; ?>";
 		</script>
 		<?
-	}elseif($tipoProcesamiento * 1 < 1){
-		?>
-		<script type="text/javascript">
-			window.location = "processNSE.php?start=1&nivel=1&cpu=<? echo $cpu; ?>";
-		</script>
-		<?
 	}else{
 		?>
 		<script type="text/javascript">
