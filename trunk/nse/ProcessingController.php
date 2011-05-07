@@ -12,7 +12,7 @@ function openDrawing(cpu){
 	port = ":8888";
 	window.open("http://localhost"+port+"/MapWare/shpProcessing/nse/processNSE.php?start=1&nivel=1&cpu="+cpu);
 }
-for(i=1; i<=7 ; i++){
+for(i=0; i<=7 ; i++){
 	openDrawing(i);
 }
 </script>
