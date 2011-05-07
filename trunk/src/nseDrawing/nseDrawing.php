@@ -1,7 +1,7 @@
 <?PHP	
 class NSEProcessing extends MapWareCore{
 	
-	var $imagenes_por_request = 200;
+	var $imagenes_por_request = 500;
 	var $cpu;
 	
 	var $bufferSize;
@@ -22,14 +22,13 @@ class NSEProcessing extends MapWareCore{
 		$this->cpu = $cpuNumber;
 	}
 	
-	function startProcessingAllNoMatchToOurSateliteAssets(){
+	function startProcessing(){
 		$this->actualizarEscalaPorNivel($this->nivel);
 		
-		$query = "select imagenes.*, astext(imagenes.mysql_puntos) as mysql_puntos_text
-		from imagenes
-		where imagenes.nivel = '$this->nivel'
-		and mapa_exists in ('0','1') 
-		AND `cpu` = '".$this->cpu."'
+		$query = "select nse_imagenes.*
+		from nse_imagenes
+		where nse_imagenes.aDibujar = '0'
+		AND `cpu` = '".$this->cpu."' AND nivel = '$this->nivel'
 		limit $this->imagenes_por_request";
 		$res = mysql_query($query) or die($query);
 		$this->processImages($res);
@@ -68,8 +67,8 @@ class NSEProcessing extends MapWareCore{
 			//tomar la informacion del archivo e ingresarla a la base de datos
 			$file = mysql_real_escape_string(file_get_contents($archivo));
 			//guardar en base de datos que la imagen ya fue dibujada
-			$query = "UPDATE `imagenes_nse`
-			SET `hibrido` = '$file', `hibrido_exists` = '1'
+			$query = "UPDATE `nse_imagenes`
+			SET `imagen` = '$file', `aDibujar` = '1'
 			WHERE `i` = '".$this->image["i"]."' and `j` = '".$this->image["j"]."' 
 			and `nivel` = '".$this->image["nivel"]."'";
 			
@@ -80,10 +79,12 @@ class NSEProcessing extends MapWareCore{
 	
 	function drawNSE(){
 		//sacar la informacion asociada a la imagen a dibujar
-		$query = "SELECT `text_puntos` 
+		$query = "SELECT nse.* 
 		FROM `nse`
-		WHERE MBRIntersects(mysql_puntos, geomfromtext('".$this->image["mysql_puntos_text"]."') ) = '1'
-		order by `size` desc";
+		join nse_por_imagen on nse_por_imagen.clave = nse.clave
+		join imagenes on nse_por_imagen.i = imagenes.i and nse_por_imagen.j = imagenes.j and nse_por_imagen.nivel = imagenes.nivel
+		WHERE imagenes.i = ".$this->image["i"]." and imagenes.j = ".$this->image["j"]." and imagenes.nivel = ".$this->image["nivel"];
+		
 		$poligonos = mysql_query($query) or die($query);
 		while($poligono = mysql_fetch_array($poligonos)){
 			//split en partes
@@ -99,8 +100,15 @@ class NSEProcessing extends MapWareCore{
 					array_push($puntosPolygon, $this->resize * $xy[0]/$this->escala);
 					array_push($puntosPolygon, $this->resize * $xy[1]/$this->escala);
 				}
-				//color transparente para el fill
-				$this->imageCanvas->drawFilledPolygon($puntosPolygon, $this->layer["colorBorder"], "FFFFFF7f");
+				//color transparente para el fill es FFFFFF7f  tentativo 64
+				$red = dechex($poligono["col_r"]);
+				$red = (strlen($red) == 2) ? $red : "0".$red;
+				$green = dechex($poligono["col_g"]);
+				$green = (strlen($green) == 2) ? $green : "0".$green;
+				$blue = dechex($poligono["col_b"]);
+				$blue = (strlen($blue) == 2) ? $blue : "0".$blue;
+				$color = $red.$green.$blue."64";
+				$this->imageCanvas->drawFilledPolygon($puntosPolygon, "FFFFFF7f", "$color");
 			}
 		}
 	}

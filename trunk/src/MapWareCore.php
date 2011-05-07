@@ -20,6 +20,9 @@ include_once("drawing/DrawImage.php");
 include_once("satelite/SateliteProcessing.php");
 include_once("hibrido/HibridoProcessing.php");
 
+include_once("nseDrawing/nseDrawing.php");
+include_once("nseDrawing/NSEInsertShapeFile.inc.php");
+
 include_once("export/Export.php");
 
 class MapWareCore{
