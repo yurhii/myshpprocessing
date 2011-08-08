@@ -17,6 +17,10 @@ class NSEProcessing extends MapWareCore{
 	
 	function NSEProcessing($nivel = 1, $cpuNumber = 1){
 		$this->openMySQLConn();
+		//nos conectamos a la base de nse si estamos en el server
+		if(strpos($_SERVER["SERVER_NAME"], "mapware") != false){
+			mysql_select_db("lfbarba2_nse");
+		}
 		$this->defineMapWareBounds();
 		$this->nivel = $nivel;
 		$this->cpu = $cpuNumber;
@@ -25,9 +29,9 @@ class NSEProcessing extends MapWareCore{
 	function startProcessing(){
 		$this->actualizarEscalaPorNivel($this->nivel);
 		
-		$query = "select nse_imagenes.*
-		from nse_imagenes
-		where nse_imagenes.aDibujar = '0'
+		$query = "select Santander.nse_imagenes.*
+		from Santander.nse_imagenes
+		where aDibujar = '0'
 		AND `cpu` = '".$this->cpu."' AND nivel = '$this->nivel'
 		limit $this->imagenes_por_request";
 		$res = mysql_query($query) or die($query);
@@ -67,7 +71,7 @@ class NSEProcessing extends MapWareCore{
 			//tomar la informacion del archivo e ingresarla a la base de datos
 			$file = mysql_real_escape_string(file_get_contents($archivo));
 			//guardar en base de datos que la imagen ya fue dibujada
-			$query = "UPDATE `nse_imagenes`
+			$query = "UPDATE Santander.nse_imagenes
 			SET `imagen` = '$file', `aDibujar` = '1'
 			WHERE `i` = '".$this->image["i"]."' and `j` = '".$this->image["j"]."' 
 			and `nivel` = '".$this->image["nivel"]."'";
@@ -79,11 +83,10 @@ class NSEProcessing extends MapWareCore{
 	
 	function drawNSE(){
 		//sacar la informacion asociada a la imagen a dibujar
-		$query = "SELECT nse.* 
-		FROM `nse`
-		join nse_por_imagen on nse_por_imagen.clave = nse.clave
-		join imagenes on nse_por_imagen.i = imagenes.i and nse_por_imagen.j = imagenes.j and nse_por_imagen.nivel = imagenes.nivel
-		WHERE imagenes.i = ".$this->image["i"]." and imagenes.j = ".$this->image["j"]." and imagenes.nivel = ".$this->image["nivel"];
+		$query = "SELECT Santander.nse.* 
+		FROM Santander.nse
+		join Santander.nse_por_imagen on Santander.nse_por_imagen.clave = Santander.nse.clave
+		WHERE i = ".$this->image["i"]." and j = ".$this->image["j"]." and nivel = ".$this->image["nivel"];
 		
 		$poligonos = mysql_query($query) or die($query);
 		while($poligono = mysql_fetch_array($poligonos)){

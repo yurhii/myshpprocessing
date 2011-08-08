@@ -21,6 +21,10 @@ class NSEInsertShapeFile extends MapWareCore{
 	var $campoClave;
 	function NSEInsertShapeFile($source_url, $tableName){
 		$this->openMySQLConn();
+		//nos conectamos a la base de nse si estamos en el server
+		if(strpos($_SERVER["SERVER_NAME"], "mapware") != false){
+			mysql_select_db("lfbarba2_nse");
+		}
 		//
 		$this->pathCampoTipo = "";
 		//
@@ -84,12 +88,12 @@ class NSEInsertShapeFile extends MapWareCore{
 							//creamos una clave unica por i, j y nivel
 							$clave_imagen = $i."_".$j."_".$nivel;
 							//insertar imagen
-							$query = "insert into nse_imagenes (i, j, nivel) values ($i, $j, $nivel)";
+							$query = "insert into Santander.nse_imagenes (i, j, nivel) values ($i, $j, $nivel)";
 							mysql_query($query);
 							
 							
 							//tabla de elementos por imagen para poder hacer el dibujado despues
-							$query = "insert into nse_por_imagen 
+							$query = "insert into Santander.nse_por_imagen 
 							(clave, i, j, nivel)
 							values
 							('$inserted_clave', '$i', '$j', '$nivel')";
@@ -138,27 +142,6 @@ class NSEInsertShapeFile extends MapWareCore{
 				$field = strtolower($key);
 				$field_value = $value;
 				//ver si el campo es parte de los catalogos, de ser asi no se añade el valor al catalogo y en la table se
-				//inserta la referencia a este
-				for($h=0; $h<count($this->catalogos); $h++){
-					if(strtolower($this->catalogos[$h]) == strtolower($key)){
-						//insertamos el valor en el catalogo
-						$query = "insert into `".$this->table_name."__".strtolower($key)."__catalogo`
-						(`".strtolower($key)."`)
-						values
-						('".$value."')";
-						if(mysql_query($query)){
-							$inserted_id = mysql_insert_id();
-						}else{
-							$query = "select id from `".$this->table_name."__".strtolower($key)."__catalogo`
-							where `".strtolower($key)."` = '".$value."'";
-							$result = mysql_fetch_array(mysql_query($query)) or die($query);
-							$inserted_id = $result["id"];
-						}
-						//en table_name ingresamos el id del catalogo correspondiente al valor en lugar del value del shp
-						$field = strtolower($key)."_id";
-						$field_value = $inserted_id;
-					}
-				}
 				//agregar valores y campos al array correspondiente para el query de insert
 				if(strtolower($key) == $this->campoClave){
 					array_push($campos, "`clave`");
@@ -198,7 +181,7 @@ class NSEInsertShapeFile extends MapWareCore{
 		array_push($campos, "`size`");
 		array_push($valores, "'".$size."'");
 		//query de insertado
-		$query = "insert into ".$this->table_name."
+		$query = "insert into Santander.".$this->table_name."
 		(".implode(", ", $campos).")
 		values
 		(".implode(", ", $valores).")";
@@ -214,7 +197,7 @@ class NSEInsertShapeFile extends MapWareCore{
 		//ver si la tabla ya existe de lo contrario crearla
 		if(mysql_num_rows(mysql_query($query)) == 0){
 			//crear la tabla
-			$query = "create table ".$this->table_name." ( ";
+			$query = "create table Santander.".$this->table_name." ( ";
 			$campos = array();
 			$indices = array();
 			foreach($dbf_data as $key=>$value){
@@ -239,22 +222,7 @@ class NSEInsertShapeFile extends MapWareCore{
 							$tipo = "varchar(50)";
 						}
 					}
-					//ver si el campo es parte de los catalogos, de ser asi no se añade su tipo si no un int
-					//y se crea el catalogo correspondiente
-					for($k=0; $k<count($this->catalogos); $k++){
-						if(strtolower($this->catalogos[$k]) == strtolower($key)){
-							//creamos el catalogo
-							$queryCreateCatalogo = "create table ".$this->table_name."__".strtolower($key)."__catalogo (
-							`id` int not null  AUTO_INCREMENT PRIMARY KEY,
-							`".strtolower($key)."` ".$tipo." not null,
-							UNIQUE(`".strtolower($key)."`)
-							) ENGINE = ".$this->engine;
-							mysql_query($queryCreateCatalogo) or die($queryCreateCatalogo);
-							//modificar el tipo para que en table_name sea un integer con foregin key apuntando al catalogo
-							$key = $key."_ID";
-							$tipo = "int";
-						}
-					}
+					
 					if(strtolower($key) != $this->campoClave){
 						array_push($campos,  "`".strtolower($key)."` ".$tipo." not null");
 						array_push($indices, "index(`".strtolower($key)."`)");
@@ -287,11 +255,11 @@ class NSEInsertShapeFile extends MapWareCore{
 			//primary key
 			$query .= ", primary key (`clave`) ";
 			$query .= " ) ENGINE = ".$this->engine;
-			mysql_query($query) or die($query);
+			mysql_query($query);
 			
 			
 			/*********Crear table de objetos por imagen ********/
-			$query = "CREATE TABLE  `".$this->table_name."_por_imagen` (
+			$query = "CREATE TABLE  Santander.".$this->table_name."_por_imagen (
 			`clave` VARCHAR( 255 ) NOT NULL ,
 			`i` INT NOT NULL ,
 			`j` INT NOT NULL ,
@@ -303,7 +271,7 @@ class NSEInsertShapeFile extends MapWareCore{
 				 `nivel`),
 			KEY(i, j, nivel)
 			) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
-			mysql_query($query) or die($query);
+			mysql_query($query);
 			
 			
 		}
